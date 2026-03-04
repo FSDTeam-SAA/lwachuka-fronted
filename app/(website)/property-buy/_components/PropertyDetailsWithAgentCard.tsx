@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MapPin, BedDouble, Bath, Square, Check } from "lucide-react";
+import { MapPin, BedDouble, Bath, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /* ---------------- DUMMY DATA ---------------- */

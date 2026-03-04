@@ -22,7 +22,7 @@ export function Navbar() {
     { href: '/', label: 'Home' },
     { href: '/properties', label: 'Properties' },
     { href: '/about-us', label: 'About us' },
-    { href: '#', label: 'Agents & Vendors' },
+    { href: '/agent&vendor', label: 'Agents & Vendors' },
     { href: '/contact-us', label: 'Contact us' },
   ];
   const isActive = (href: string) => {

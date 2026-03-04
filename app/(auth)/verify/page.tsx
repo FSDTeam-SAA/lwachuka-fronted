@@ -147,7 +147,7 @@ export default function VerifyOtpPage() {
                         00:{timer.toString().padStart(2, '0')}
                     </div>
                     <div>
-                        <span className="text-slate-500 mr-1">Don't get a code?</span>
+                        <span className="text-slate-500 mr-1">Don&apos;t get a code?</span>
                         {timer === 0 ? (
                             <button
                                 onClick={handleResend}
