@@ -44,13 +44,13 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
     matcher: [
-        '/login',
-        '/register',
-        '/forgot-password',
-        '/verify',
-        '/reset-password',
-        '/user/:path*',
-        '/agent/:path*',
-        '/vendor/:path*'
+        // '/login',
+        // '/register',
+        // '/forgot-password',
+        // '/verify',
+        // '/reset-password',
+        // '/user/:path*',
+        // '/agent/:path*',
+        // '/vendor/:path*'
     ]
 };
