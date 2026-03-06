@@ -18,7 +18,7 @@ const plans = [
     ],
   },
   {
-    icon: <Star className="h-5 w-5 text-white" />,
+    icon: <Star className="h-5 w-5 text-gray-800" />,
     name: "Professional",
     price: "KSH 499",
     period: "/1 month",
@@ -50,21 +50,23 @@ function BillingPaymentsPlan() {
   return (
     <div className="p-6">
       <h2 className="text-lg font-semibold">Subscription Plans</h2>
-      <p className="text-sm text-muted-foreground mb-6">Upgrade or downgrade your plan anytime</p>
+      <p className="text-sm text-muted-foreground mb-8">
+        Upgrade or downgrade your plan anytime
+      </p>
 
-      <div className="grid grid-cols-3 gap-4 items-center">
+      <div className="grid grid-cols-3 gap-4 items-center py-4">
         {plans.map((plan) => (
           <Card
             key={plan.name}
             className={`relative rounded-2xl border transition-all ${
               plan.popular
-                ? " text-black border-[#0F172A] scale-105 shadow-xl z-10"
+                ? "bg-[#0F172A] border-[#0F172A] scale-105 shadow-xl z-10"
                 : "bg-white border-gray-200 shadow-sm"
             }`}
           >
             {plan.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-[#1E293B] text-white text-xs px-3 py-1 rounded-full border border-gray-600">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                <Badge className="bg-[#1E293B] text-white text-xs px-3 py-1 rounded-full border border-gray-600 whitespace-nowrap">
                   Most Popular
                 </Badge>
               </div>
@@ -73,22 +75,36 @@ function BillingPaymentsPlan() {
             <CardContent className="p-6 space-y-5">
               {/* Icon + Name */}
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  plan.popular ? "bg-white/10" : "bg-yellow-50"
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    plan.popular ? "bg-white/10" : "bg-yellow-50"
+                  }`}
+                >
                   {plan.icon}
                 </div>
-                <span className={`font-semibold text-base ${plan.popular ? "text-white" : "text-gray-800"}`}>
+                <span
+                  className={`font-semibold text-base ${
+                    plan.popular ? "text-white" : "text-gray-800"
+                  }`}
+                >
                   {plan.name}
                 </span>
               </div>
 
               {/* Price */}
               <div>
-                <span className={`text-3xl font-bold ${plan.popular ? "text-white" : "text-gray-900"}`}>
+                <span
+                  className={`text-3xl font-bold ${
+                    plan.popular ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   {plan.price}
                 </span>
-                <span className={`text-sm ${plan.popular ? "text-gray-300" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-sm ${
+                    plan.popular ? "text-gray-400" : "text-muted-foreground"
+                  }`}
+                >
                   {plan.period}
                 </span>
               </div>
@@ -97,8 +113,18 @@ function BillingPaymentsPlan() {
               <ul className="space-y-2">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
-                    <Zap className={`h-4 w-4 mt-0.5 flex-shrink-0 ${plan.popular ? "text-blue-400" : "text-blue-500"}`} />
-                    <span className={`text-sm ${plan.popular ? "text-gray-300" : "text-gray-600"}`}>{f}</span>
+                    <Zap
+                      className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                        plan.popular ? "text-blue-400" : "text-blue-500"
+                      }`}
+                    />
+                    <span
+                      className={`text-sm ${
+                        plan.popular ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {f}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -107,7 +133,7 @@ function BillingPaymentsPlan() {
               <Button
                 className={`w-full rounded-xl font-semibold mt-2 ${
                   plan.popular
-                    ? "bg-white text-[#0F172A] hover:bg-gray-100"
+                    ? "bg-white text-[#0F172A] hover:bg-gray-100 border-0"
                     : "bg-transparent border border-yellow-400 text-yellow-500 hover:bg-yellow-50"
                 }`}
                 variant="outline"
