@@ -21,7 +21,7 @@ const navigation = [
   { name: "Advertisements", href: "/advertisements", icon: Megaphone },
   { name: "Paid Listing", href: "/paid-listings", icon: Banknote },
   { name: "Subscription Management", href: "/subscription-management", icon: BellDot },
-  { name: "Payment Management", href: "/payment-management", icon: CreditCard },
+  { name: "Billing & Payments", href: "/billing-payments", icon: CreditCard },
   { name: "Analytics & Reports", href: "/analytics-reports", icon: ChartColumn },
   { name: "Security & Audit Logs", href: "/security-audit", icon: Shield },
   { name: "Settings", href: "/settings", icon: Settings },
