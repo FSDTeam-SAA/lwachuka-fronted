@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import api from "@/lib/api";
-import { Button } from "@/components/ui/button";
 
-export default function VerifyOtpPage() {
+import { Button } from "@/components/ui/button";
+function VerifyOtpContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
@@ -85,8 +85,8 @@ export default function VerifyOtpPage() {
             } else {
                 setError(res.data.message || "Invalid OTP");
             }
-        } catch (err: any) {
-            setError(err?.response?.data?.message || "Verification failed. Please try again.");
+        } catch {
+            setError("Verification failed. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -97,7 +97,7 @@ export default function VerifyOtpPage() {
             await api.post("/auth/forgot-password", { email });
             setTimer(59);
             setError("");
-        } catch (err: any) {
+        } catch {
             setError("Failed to resend code");
         }
     };
@@ -171,5 +171,17 @@ export default function VerifyOtpPage() {
                 </Button>
             </div>
         </div>
+    );
+}
+
+export default function VerifyOtpPage() {
+    return (
+        <Suspense fallback={
+            <div className="w-full flex items-center justify-center py-12">
+                <Loader2 className="animate-spin h-8 w-8 text-[#0B2341]" />
+            </div>
+        }>
+            <VerifyOtpContent />
+        </Suspense>
     );
 }

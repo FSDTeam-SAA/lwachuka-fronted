@@ -1,0 +1,108 @@
+# Lwachuka Frontend Structure (Agent Module)
+
+## 🛠️ Technology Stack
+- **Framework:** Next.js 14+ (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS, shadcn/ui (Radix UI under the hood)
+- **Data Fetching & State Management:** React Query v5 (TanStack Query)
+- **Authentication:** NextAuth.js (v4) with Custom Credentials Provider
+- **Form Handling:** React Hook Form + Zod (Validation)
+- **Notifications:** Sonner (Toast notifications)
+- **Icons:** Lucide React
+- **Date Formatting:** date-fns
+
+---
+
+## 📂 Folder Structure overview for Agent Module
+
+`app/agent/` - Holds all the agent dashboard routes.
+  ├── `layout.tsx` - Layout file containing the Sidebar and main content area.
+  ├── `dashboard/page.tsx` - Main agent dashboard overview.
+  ├── `leads/page.tsx` - Leads and Enquiries page.
+  ├── `settings/page.tsx` - Agent settings page.
+  └── ...other agent routes
+
+`components/` - Holds all React components.
+  ├── `dashboard/` - Components used across the dashboard (e.g., Sidebar, Navbar).
+  │    └── `settings/` - ProfileCard, ProfileForm, ChangePasswordForm.
+  ├── `leads/` - Components specific to the leads feature (LeadRow, LeadStatCards, LeadContactModal).
+  └── `ui/` - Shadcn UI components (button, input, badge, skeleton, dialog, etc.).
+
+`lib/` - Utility functions, configurations, and API logic.
+  ├── `api.ts` - Axios instance configured with baseURL and NextAuth interceptor for token injection.
+  ├── `utils.ts` - Tailwind merge helper function (`cn`).
+  └── `queries/` - React Query fetcher functions organized by feature.
+       ├── `user.ts` - Queries/mutations for user profile & settings.
+       └── `leads.ts` - Queries/mutations for leads and enquiries.
+
+`types/` - TypeScript interface definitions.
+  ├── `user.ts` - Types for User, Profile Update Payload, API Responses.
+  ├── `leads.ts` - Types for Lead, LeadStat, CreateLeadPayload, etc.
+  └── `next-auth.d.ts` - Type declarations augmenting NextAuth Session/User to include custom fields like `accessToken`, `role`, `_id`.
+
+---
+
+## 🔄 API Flow & Data Management
+
+The agent module follows a strict, modular approach for making API calls and managing data state.
+
+### 1. The Axios Instance (`lib/api.ts`)
+Everything routes through a central Axios instance. We use an interceptor to extract the `accessToken` directly from the user's secure NextAuth session state.
+```typescript
+// Authentication Interceptor Example:
+api.interceptors.request.use(async (config) => {
+  const session = await getSession();
+  if (session?.user?.accessToken) {
+    config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+  }
+  return config;
+});
+```
+
+*(Note: We also sometimes manually pass the token using `useSession()` into our fetchers, specially in Client Components when data needs to be populated quickly without waiting for `getSession` promises.)*
+
+### 2. The Fetcher Layer (`lib/queries/*.ts`)
+All API calls are extracted out of components into separate query files. Each file exports logic for a specific feature:
+- **Keys Pattern:** Export a standard `keys` object to ensure React Query caching is predictable.
+- **Fetchers:** Async functions utilizing `api.get`, `api.post`, `api.put`.
+```typescript
+export const leadKeys = {
+  all: ["leads"] as const,
+  list: () => [...leadKeys.all, "list"] as const,
+  // ...
+};
+
+export const getLeads = async (token?: string) => { ... }
+```
+
+### 3. The React Query Layer (In Components)
+We use TanStack Query (`@tanstack/react-query`) inside our route pages and components. React Query handles cache, loading states, error handling, and background refetching.
+
+**Fetching Data:**
+```tsx
+const { data, isLoading } = useQuery({
+  queryKey: leadKeys.list(),
+  queryFn: () => getLeads(token),
+  enabled: !!token, // Only fetch if token is available
+});
+```
+
+**Mutating Data (POST/PUT/DELETE):**
+```tsx
+const mutation = useMutation({
+  mutationFn: (payload) => updateUser(userId, payload, token),
+  onSuccess: () => {
+    // Show toast message
+    toast.success("Updated successfully");
+    // Invalidate the cache to instantly refetch fresh data
+    queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) });
+  }
+});
+```
+
+---
+
+## 🔐 Authentication Flow
+1. **Login:** User authenticates via `/auth/login` page using React Hook Form and Zod. 
+2. **NextAuth `authorize` Callback:** Backend API `/auth/login` is hit. If successful, NextAuth stores the resulting `user` details and the `accessToken` in an HTTP-only JWT cookie.
+3. **Session:** The `useSession()` hook exposes this token to the frontend, allowing secure API calls to the backend via the Interceptor or explicit Headers.

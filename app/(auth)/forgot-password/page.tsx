@@ -45,9 +45,9 @@ export default function ForgotPasswordPage() {
             } else {
                 setError(res.data.message || "Failed to send OTP");
             }
-        
-        } catch (err: any) {
-            setError(err?.response?.data?.message || "An unexpected error occurred. Please try again.");
+
+        } catch {
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                     </div>
                     <p className="font-semibold text-lg">OTP Sent Successfully!</p>
-                    <p className="text-sm opacity-90 max-w-xs">We've sent a verification code to {form.getValues("email")}.</p>
+                    <p className="text-sm opacity-90 max-w-xs">We&apos;ve sent a verification code to {form.getValues("email")}.</p>
                     <div className="flex items-center text-sm opacity-70 pt-2">
                         <Loader2 className="animate-spin mr-2 w-4 h-4" /> Redirecting...
                     </div>

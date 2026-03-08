@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +22,7 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -36,7 +36,7 @@ export default function LoginPage() {
         defaultValues: {
             email: "",
             password: "",
-            rememberMe: false,
+            rememberMe: true, // Defaulting to true as requested
         },
     });
 
@@ -53,16 +53,19 @@ export default function LoginPage() {
 
             if (result?.error) {
                 setError(result.error);
+                toast.error(result.error);
                 setIsLoading(false);
                 return;
             }
 
             // Successful login
+            toast.success("Login successful!");
             router.push(callbackUrl);
             router.refresh();
 
-        } catch (err: any) {
+        } catch {
             setError("An unexpected error occurred. Please try again.");
+            toast.error("An unexpected error occurred. Please try again.");
             setIsLoading(false);
         }
     };
@@ -146,9 +149,21 @@ export default function LoginPage() {
 
             <div className="mt-8 text-center">
                 <p className="text-sm text-slate-600">
-                    Don't have an account? <Link href="/register" className="text-[#0B2341] font-bold hover:underline">Sign up</Link>
+                    Don&apos;t have an account? <Link href="/register" className="text-[#0B2341] font-bold hover:underline">Sign up</Link>
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="w-full flex items-center justify-center py-12">
+                <Loader2 className="animate-spin h-8 w-8 text-[#0B2341]" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }
