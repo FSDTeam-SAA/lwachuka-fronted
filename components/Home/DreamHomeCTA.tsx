@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function DreamHomeCTA() {
   return (
@@ -22,7 +23,7 @@ export function DreamHomeCTA() {
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-20 md:py-24 text-white">
             
-            <h2 className="text-2xl md:text-3xl font-semibold">
+            <h2 className="text-2xl md:text-3xl font-semibold"> 
               Ready to Find Your Dream Home?
             </h2>
 
@@ -32,16 +33,19 @@ export function DreamHomeCTA() {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button className="bg-[#061F3D] hover:bg-[#04172d] text-white px-6 h-11 rounded-lg border border-[#D3920E]">
-                Get Started – It’s Free
+              <Link href='/contact-us'>
+              <Button className="bg-[#061F3D] hover:bg-[#04172d] text-white !px-10 h-11 rounded-lg border border-[#D3920E]">
+                Contact 
               </Button>
-
+              </Link>
+              <Link href="/login">
               <Button
                 variant="outline"
                 className="border-white text-[#0B1C39] hover:bg-white hover:text-[#0B1C39] px-6 h-11 rounded-lg"
               >
                 Sign In
               </Button>
+              </Link>
             </div>
 
           </div>

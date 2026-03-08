@@ -67,11 +67,9 @@ function StatCard({
 function UpcomingVisitCard({
   item,
   onCancel,
-  onView,
 }: {
   item: UpcomingVisit;
-  onCancel?: (id: number) => void;
-  onView?: (item: UpcomingVisit) => void;
+  onCancel?: (item: UpcomingVisit) => void;
 }) {
   return (
     <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 shadow-[0_4px_14px_rgba(15,23,42,0.06)] sm:p-5">
@@ -115,7 +113,6 @@ function UpcomingVisitCard({
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
-          onClick={() => onView?.(item)}
           className="h-11 flex-1 rounded-lg border-2 border-[#061F3D] bg-white text-[14px] font-medium text-[#061F3D] hover:bg-slate-50"
         >
           View Details
@@ -123,7 +120,7 @@ function UpcomingVisitCard({
 
         <button
           type="button"
-          onClick={() => onCancel?.(item.id)}
+          onClick={() => onCancel?.(item)}
           className="h-11 rounded-lg bg-[#E5533D] px-4 text-[13px] font-medium text-white hover:bg-[#ea4f33] sm:w-auto"
         >
           Cancel
@@ -269,8 +266,7 @@ export default function SiteVisitsClone() {
               <UpcomingVisitCard
                 key={item.id}
                 item={item}
-                onCancel={handleCancel}
-                onView={setSelectedVisit}
+                onCancel={setSelectedVisit}
               />
             ))}
           </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useParams } from "next/navigation";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface ContactModalProps {
@@ -9,14 +11,75 @@ interface ContactModalProps {
 
 export default function ContactModal({ trigger }: ContactModalProps) {
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    phoneNumber: "",
+    message: "",
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const params = useParams();
+  const propertyId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // ekhane pore API call / email / form submit logic dite parba
-    console.log("Message submitted");
+    if (!propertyId) {
+      toast.error("Property id is missing.");
+      return;
+    }
+    if (!formData.email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (!formData.message.trim()) {
+      toast.error("Message cannot be empty");
+      return;
+    }
 
-    setOpen(false);
+    setIsLoading(true);
+
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTZiZjRhNDA1Y2MxYThjNDU4YTM1ZiIsImVtYWlsIjoidXNlckBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3Mjk2ODM4NSwiZXhwIjoxNzczNTczMTg1fQ.bZoc3EWCqSjA1abkwRIAf7Vo-MGltLo_kQxAEiUbS2o"
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/contact-property/${propertyId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: formData.email.trim(),
+            phoneNumber: formData.phoneNumber.trim(),
+            message: formData.message.trim(),
+          }),
+        }
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to send message");
+      }
+
+      toast.success("Message sent successfully!");
+      setFormData({ email: "", phoneNumber: "", message: "" });
+      setOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send message. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -62,7 +125,11 @@ export default function ContactModal({ trigger }: ContactModalProps) {
               </label>
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="hello@example.com"
+                required
                 className="
                   h-[48px]
                   w-full
@@ -86,6 +153,9 @@ export default function ContactModal({ trigger }: ContactModalProps) {
               </label>
               <input
                 type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
                 placeholder="+971 4567890"
                 className="
                   h-[48px]
@@ -110,7 +180,11 @@ export default function ContactModal({ trigger }: ContactModalProps) {
               </label>
               <textarea
                 rows={7}
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 placeholder="Write your message here..."
+                required
                 className="
                   min-h-[160px]
                   w-full
@@ -132,6 +206,7 @@ export default function ContactModal({ trigger }: ContactModalProps) {
 
             <button
               type="submit"
+              disabled={isLoading}
               className="
                 h-[48px]
                 w-full
@@ -142,9 +217,11 @@ export default function ContactModal({ trigger }: ContactModalProps) {
                 text-white
                 transition
                 hover:bg-[#081a31]
+                disabled:cursor-not-allowed
+                disabled:opacity-70
               "
             >
-              Send Message
+              {isLoading ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Home, Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -41,7 +42,7 @@ export function BrowsePurpose() {
                 </div>
 
                 <h3 className="text-2xl font-semibold mb-3">
-                  Buy Properties
+                  Rent Properties
                 </h3>
 
                 <p className="max-w-sm text-white/90">
@@ -51,9 +52,14 @@ export function BrowsePurpose() {
 
               {/* Button */}
               <div>
-                <Button className="w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6">
-                  Browse Buy Listings
-                  <ArrowRight className="w-5 h-5" />
+                <Button
+                  asChild
+                  className="w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6"
+                >
+                  <Link href="/properties?tab=rent">
+                    Browse Rent Listings
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -78,7 +84,7 @@ export function BrowsePurpose() {
                 </div>
 
                 <h3 className="text-2xl font-semibold mb-3">
-                  Rent Properties
+                 Sale Properties
                 </h3>
 
                 <p className="max-w-sm text-white/90">
@@ -87,9 +93,14 @@ export function BrowsePurpose() {
               </div>
 
               <div>
-                <Button className="w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6">
-                  Browse Rent Listings
-                  <ArrowRight className="w-5 h-5" />
+                <Button
+                  asChild
+                  className="w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6"
+                >
+                  <Link href="/properties?tab=sale">
+                    Browse Sale Listings
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
                 </Button>
               </div>
             </div>

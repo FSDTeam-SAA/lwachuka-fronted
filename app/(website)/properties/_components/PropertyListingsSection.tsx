@@ -1,112 +1,92 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/common/PropertyCard";
-import { useMemo, useState } from "react";
+import { FeaturedPropertySkeleton } from "@/components/skeleton/FeaturedPropertySkeleton";
 
 type TabType = "all" | "sale" | "rent";
 
+interface Property {
+  _id: string;
+  title: string;
+  listingType: "For Sale" | "For Rent";
+  propertyType: string;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  plot: number;
+  location: string;
+  price: number;
+  images: string[];
+  status: "approved" | "rejected" | "pending";
+  description?: string;
+  // add more fields later if needed
+}
+
+async function fetchApprovedProperties(): Promise<Property[]> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/property/subscriber-property-top?status=approved`); 
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch properties");
+  }
+
+  const json: {
+    success: boolean;
+    data: Property[];
+  } = await res.json();
+
+  if (!json.success || !Array.isArray(json.data)) {
+    throw new Error("Invalid API response");
+  }
+
+  return json.data.filter((p) => p.status === "approved");
+}
+
 export function PropertyListingsSection() {
-  const [activeTab, setActiveTab] = useState<TabType>("all");
+  const searchParams = useSearchParams();
 
-  // Dummy Data (you can replace later)
-  const properties = useMemo(
-    () => [
-      {
-        id: 1,
-        image: '/cardimage.jpg',
-        title: "Modern 3-Bedroom Apartment in Westland’s",
-        location: "Westland’s, Nairobi",
-        price: "KSh 45.0M",
-        beds: 5,
-        baths: 6,
-        status: "For Sale" as const,
-        availability: "Available",
-        builtUpSqft: "1,976 sqft",
-        plotSqft: "2,268 sqft",
-        tagline: "Genuine Resale | End Unit | Luxurious",
-      },
-      {
-        id: 2,
-        image: '/cardimage.jpg',
-        title: "Modern 3-Bedroom Apartment in Westland’s",
-        location: "Westland’s, Nairobi",
-        price: "KSh 45.0M",
-        beds: 5,
-        baths: 6,
-        status: "For Sale" as const,
-        availability: "Available",
-        builtUpSqft: "1,976 sqft",
-        plotSqft: "2,268 sqft",
-        tagline: "Genuine Resale | End Unit | Luxurious",
-      },
-      {
-        id: 3,
-        image: '/cardimage.jpg',
-        title: "Modern 3-Bedroom Apartment in Westland’s",
-        location: "Westland’s, Nairobi",
-        price: "KSh 45.0M",
-        beds: 5,
-        baths: 6,
-        status: "For Sale" as const,
-        availability: "Available",
-        builtUpSqft: "1,976 sqft",
-        plotSqft: "2,268 sqft",
-        tagline: "Genuine Resale | End Unit | Luxurious",
-      },
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "sale" || tabParam === "rent" || tabParam === "all") {
+      return tabParam;
+    }
+    return "all";
+  });
 
-      // Extra dummy for Rent tab (you said you will add later)
-      {
-        id: 4,
-        image: '/cardimage.jpg',
-        title: "Luxury 2BR Apartment in Kilimani",
-        location: "Kilimani, Nairobi",
-        price: "KSh 85,000/mo",
-        beds: 2,
-        baths: 2,
-        status: "For Rent" as const,
-        availability: "Available",
-        builtUpSqft: "1,150 sqft",
-        plotSqft: "—",
-        tagline: "Fully Furnished | Great View | Secure",
-      },
-      {
-        id: 5,
-        image: '/cardimage.jpg',
-        title: "Cozy Studio Flat in Lavington",
-        location: "Lavington, Nairobi",
-        price: "KSh 45,000/mo",
-        beds: 1,
-        baths: 1,
-        status: "For Rent" as const,
-        availability: "Available",
-        builtUpSqft: "520 sqft",
-        plotSqft: "—",
-        tagline: "Affordable | Near Mall | Quiet Area",
-      },
-      {
-        id: 6,
-       image: '/cardimage.jpg',
-        title: "Spacious 3BR Townhouse in Karen",
-        location: "Karen, Nairobi",
-        price: "KSh 120,000/mo",
-        beds: 3,
-        baths: 3,
-        status: "For Rent" as const,
-        availability: "Available",
-        builtUpSqft: "1,980 sqft",
-        plotSqft: "—",
-        tagline: "Family Friendly | Parking | Garden",
-      },
-    ],
-    []
-  );
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "sale" || tabParam === "rent" || tabParam === "all") {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
-  const filtered = useMemo(() => {
-    if (activeTab === "all") return properties.slice(0, 3); // show 3 like screenshot
-    if (activeTab === "sale")
-      return properties.filter((p) => p.status === "For Sale").slice(0, 3);
-    return properties.filter((p) => p.status === "For Rent").slice(0, 3);
-  }, [activeTab, properties]);
+  const { data, isLoading, isError } = useQuery<Property[], Error>({
+    queryKey: ["public-properties-approved"],
+    queryFn: fetchApprovedProperties,
+    staleTime: 1000 * 60 * 5, 
+    gcTime: 1000 * 60 * 30,  
+  });
+
+  const saleCount = data?.filter((p) => p.listingType === "For Sale").length ?? 0;
+  const rentCount = data?.filter((p) => p.listingType === "For Rent").length ?? 0;
+  const totalCount = data?.length ?? 0;
+
+  const displayedProperties = useMemo(() => {
+    if (!data) return [];
+
+    let filtered = data;
+
+    if (activeTab === "sale") {
+      filtered = data.filter((p) => p.listingType === "For Sale");
+    } else if (activeTab === "rent") {
+      filtered = data.filter((p) => p.listingType === "For Rent");
+    }
+ 
+
+    return filtered.slice(0, 3);
+  }, [data, activeTab]);
 
   return (
     <section className="py-16 md:py-24 bg-white">
@@ -116,49 +96,84 @@ export function PropertyListingsSection() {
           <h2 className="text-2xl md:text-[32px] font-bold text-[#0B1C39]">
             All <span className="text-[#D3920E]">Property Listings</span>
           </h2>
-          <p className="mt-3 text-base text-[#8E938F] ">
-            A thoughtfully designed property offering modern features, quality
-            finishes, and a comfortable living experience in a prime location.
+          <p className="mt-3 text-base text-[#8E938F]">
+            Discover a curated selection of modern, high-quality properties in prime locations
+            across Kenya.
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="mt-8 flex items-center gap-8 text-xl">
+        <div className="mt-8 flex items-center gap-8 md:gap-12 text-xl font-medium">
           <TabButton
             active={activeTab === "all"}
             onClick={() => setActiveTab("all")}
-            label="All Properties"
+            label={`All Properties (${totalCount})`}
           />
           <TabButton
             active={activeTab === "sale"}
             onClick={() => setActiveTab("sale")}
-            label="For Sale"
+            label={`For Sale (${saleCount})`}
           />
           <TabButton
             active={activeTab === "rent"}
             onClick={() => setActiveTab("rent")}
-            label="For Rent"
+            label={`For Rent (${rentCount})`}
           />
         </div>
 
-        {/* Cards */}
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => (
-            <PropertyCard
-              key={p.id}
-              image={p.image}
-              title={p.title}
-              location={p.location}
-              price={p.price}
-              beds={p.beds}
-              baths={p.baths}
-              status={p.status}
-              availability={p.availability}
-              builtUpSqft={p.builtUpSqft}
-              plotSqft={p.plotSqft}
-              tagline={p.tagline}
-            />
-          ))}
+        {/* Content */}
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoading ? (
+            <>
+              <FeaturedPropertySkeleton />
+              <FeaturedPropertySkeleton />
+              <FeaturedPropertySkeleton />
+            </>
+          ) : isError ? (
+            <div className="col-span-full py-16 text-center text-red-600">
+              Sorry, we couldn&apos;t load the properties right now. Please try again later.
+            </div>
+          ) : displayedProperties.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-gray-500">
+              {activeTab === "all"
+                ? "No approved properties available at the moment."
+                : activeTab === "sale"
+                ? "No properties currently listed for sale."
+                : "No rental properties available right now."}
+            </div>
+          ) : (
+            displayedProperties.map((property) => {
+              const mainImage = property.images?.[0] ?? "/placeholder-property.jpg";
+
+              const priceDisplay =
+                property.listingType === "For Rent"
+                  ? `KSh ${property.price.toLocaleString()} / month`
+                  : property.price >= 1_000_000
+                  ? `KSh ${(property.price / 1_000_000).toFixed(1)}M`
+                  : `KSh ${property.price.toLocaleString()}`;
+
+              return (
+                <PropertyCard
+                  key={property._id}
+                  id={property._id}
+                  image={mainImage}
+                  title={property.title}
+                  location={property.location}
+                  price={priceDisplay}
+                  beds={property.bedrooms}
+                  baths={property.bathrooms}
+                  status={property.listingType} 
+                  availability="Available"
+                  builtUpSqft={`${property.area} sqm`}
+                  plotSqft={property.plot }
+                  tagline={
+                    property.propertyType ||
+                    (property.listingType === "For Rent" ? "Rental Apartment" : "Residential")
+                  }
+                />
+              );
+            })
+          )}
         </div>
       </div>
     </section>
@@ -178,18 +193,17 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={[
-        "relative pb-2 transition",
-        active ? "text-[#0B1C39] font-semibold" : "text-[#8A8A8A]",
-      ].join(" ")}
+      className={`
+        relative pb-2.5 text-lg transition-colors
+        ${active ? "text-[#0B1C39] font-semibold" : "text-[#8A8A8A] hover:text-[#0B1C39]"}
+      `}
     >
       {label}
-      {/* underline like screenshot */}
       <span
-        className={[
-          "absolute left-0 -bottom-[2px] h-[2px] w-full rounded-full transition",
-          active ? "bg-[#0B1C39]" : "bg-transparent",
-        ].join(" ")}
+        className={`
+          absolute left-0 bottom-0 h-0.5 w-full rounded-full transition-all
+          ${active ? "bg-[#0B1C39] scale-x-100" : "bg-transparent scale-x-0"}
+        `}
       />
     </button>
   );
