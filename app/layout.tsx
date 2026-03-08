@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
+import { Toaster } from "@/components/ui/sonner";
+import NextTopLoader from "nextjs-toploader";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -22,9 +25,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.className} antialiased`}>
+        <NextTopLoader color="#061F3D" height={3} showSpinner={false} />
+        <ReactQueryProvider>
         <Providers>
           {children}
+           <Toaster position="top-right"/>
         </Providers>
+        </ReactQueryProvider>
       </body>
     </html>
   );

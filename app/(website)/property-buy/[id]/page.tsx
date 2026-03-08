@@ -1,18 +1,12 @@
-import React from 'react'
-import { PropertyImageGallery } from '../_components/PropertyImageGallery'
-import { PropertyDetailsWithAgentCard } from '../_components/PropertyDetailsWithAgentCard'
-import { PropertyExtrasSection } from '../_components/PropertyExtrasSection'
-import SimilarProperies from '../_components/SimilarProperies'
+import React from "react";
+import MainDetailspage from "../_components/MainDetailspage";
 
-const page = () => {
+const page = ({ params }: { params: { id: string } }) => {
   return (
     <div>
-      <PropertyImageGallery/>
-      <PropertyDetailsWithAgentCard/>
-      <PropertyExtrasSection/>
-      <SimilarProperies/>
+      <MainDetailspage id={params.id} />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

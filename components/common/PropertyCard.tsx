@@ -10,14 +10,17 @@ interface PropertyCardProps {
   price: string;
   beds: number;
   baths: number;
-  builtUpSqft?: string; // "1,976 sqft"
-  plotSqft?: string; // "2,268 sqft"
-  tagline?: string; // "Genuine Resale | End Unit | Luxurious"
+  builtUpSqft?: string; 
+  plotSqft?: number; 
+  tagline?: string; 
   status?: "For Sale" | "For Rent";
-  availability?: string; // "Available"
+  availability?: string; 
+  id?: string
+
 }
 
 export function PropertyCard({
+  id,
   image,
   title,
   location,
@@ -25,7 +28,7 @@ export function PropertyCard({
   beds,
   baths,
   builtUpSqft = "1,976 sqft",
-  plotSqft = "2,268 sqft",
+  plotSqft ,
   tagline = "Genuine Resale | End Unit | Luxurious",
   status = "For Sale",
   availability = "Available",
@@ -119,7 +122,7 @@ export function PropertyCard({
         <p className="mt-4 text-[15px] font-medium text-[#2E353A]">
           {tagline}
         </p>
-        <Link href={`/property-buy/1`}>
+        <Link href={`/property-buy/${id}`}>
         <Button className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
           View Details
         </Button>

@@ -4,19 +4,23 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface VendorCardProps {
-  id: number;
+  id: string;
   name: string;
   company: string;
   image: string;
   listings: number;
+  role?: "agent" | "vendor";
+  advertisementCount?: number;
 }
 
 export default function VendorCard({
   id,
   name,
   company,
+  role,
   image,
   listings,
+  advertisementCount,
 }: VendorCardProps) {
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_rgba(15,23,42,0.08)] border border-[#F1F1F1]">
@@ -44,10 +48,21 @@ export default function VendorCard({
 
         {/* Listing + Profile */}
         <div className="flex items-center justify-between">
-          <div className="text-xs text-[#7D7D7D]">
+          {role== "agent" ?(
+              <div className="text-xs text-[#7D7D7D]">
             Listing:{" "}
             <span className="text-[#1E1E1E] font-medium">{listings}</span>
           </div>
+          )
+          :
+          (
+              <div className="text-xs text-[#7D7D7D]">
+            Advertisement:{" "}
+            <span className="text-[#1E1E1E] font-medium">{advertisementCount ?? 0}</span>
+          </div>
+          )
+          }
+        
           <Link href={`/vendeor-profile/${id}`}>
           <button className="text-xs font-medium text-[#051E3C] hover:opacity-80 inline-flex items-center gap-2">
             View Profile <ArrowRight className="h-4 w-4" />
