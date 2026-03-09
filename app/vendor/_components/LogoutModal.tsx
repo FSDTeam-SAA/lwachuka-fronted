@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,14 +12,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export function LogoutModal() {
-  const handleLogout = () => {
-    // 👉 এখানে তোমার logout logic দাও
-    // example:
-    // localStorage.removeItem("token")
-    // router.push("/login")
-    console.log("User logged out");
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      // NextAuth sign out
+      await signOut({ redirect: false }); // redirect false মানে আমরা নিজে redirect করবো
+      router.push("/signin"); // লগআউট হলে login page এ redirect
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -43,17 +51,11 @@ export function LogoutModal() {
             <Button variant="outline">Cancel</Button>
           </DialogClose>
 
-          <DialogClose asChild>
-            <Button variant="destructive" onClick={handleLogout}>
-              Logout
-            </Button>
-          </DialogClose>
+          <Button variant="destructive" onClick={handleLogout}>
+            Logout
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-
-
-
