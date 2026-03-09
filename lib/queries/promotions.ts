@@ -2,7 +2,8 @@ import api from "@/lib/api";
 import {
     SubscriptionsListResponse,
     MpesaPaymentPayload,
-    MpesaPaymentResponse
+    MpesaPaymentResponse,
+    MpesaCallbackPayload
 } from "@/types/promotions";
 
 export const promotionKeys = {
@@ -33,5 +34,16 @@ export const initiateMpesaPayment = async (
             headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
     );
+    return res.data;
+};
+
+// POST /mpesa/callback
+export const callbackMpesaPayment = async (
+    payload: MpesaCallbackPayload,
+    token?: string
+): Promise<{ message: string }> => {
+    const res = await api.post(`/mpesa/callback`, payload, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     return res.data;
 };
