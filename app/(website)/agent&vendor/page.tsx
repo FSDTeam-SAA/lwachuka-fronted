@@ -15,6 +15,8 @@ type User = {
   role: "agent" | "vendor";
   email?: string;
   status?: string;
+  phoneNumber?: string;
+  profileImage?: string;
   approvedPropertyCount?: number;
   advertisementCount?: number;
 };
@@ -161,7 +163,8 @@ export default function TrustedAgentsVendors() {
                 company={item.email?.split("@")[0] || "Company"}
                 listings={item.approvedPropertyCount ?? 0}
                 advertisementCount={item.advertisementCount ?? 0}
-                image="/vendor.png"
+                image={item.profileImage || "/vendor.png"}
+                phoneNumber={item.phoneNumber}
               />
             ))}
           </div>

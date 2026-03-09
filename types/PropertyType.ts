@@ -37,7 +37,7 @@ export interface Property {
   lng?: number;
   createBy?: string;
   listingUser?: Array<Record<string, unknown>>;
-  bookmarkUser?: Array<Record<string, unknown>>;
+  bookmarkUser?: Array<string | { _id?: string }>;
   createdAt?: string;
   updatedAt?: string;
   __v?: number;

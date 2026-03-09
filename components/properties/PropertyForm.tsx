@@ -1,0 +1,408 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+import { Property, PropertyFormData } from "@/types/properties";
+import {
+    createProperty,
+    updateProperty,
+    propertyKeys,
+    buildPropertyFormData
+} from "@/lib/queries/properties";
+import { PropertyImageUpload } from "./PropertyImageUpload";
+import { AmenitiesChecklist } from "./AmenitiesChecklist";
+
+const schema = z.object({
+    title: z.string().min(1, "Title is required"),
+    listingType: z.enum(["For Sale", "For Rent"]),
+    propertyType: z.string().min(1, "Property type is required"),
+    bedrooms: z.number().min(0),
+    bathrooms: z.number().min(0),
+    area: z.number().min(1, "Area is required"),
+    description: z.string().optional(),
+    location: z.string().min(1, "Location is required"),
+    price: z.number().min(1, "Price is required"),
+    // Optional detailed fields
+    builtUp: z.number().optional(),
+    plot: z.number().optional(),
+    keyBedRooms: z.string().optional(),
+    keyBathrooms: z.string().optional(),
+    keyBuiltUp: z.number().optional(),
+    keyKitchenType: z.string().optional(),
+    keyParking: z.string().optional(),
+    keyFinishes: z.string().optional(),
+    keyBalconyType: z.string().optional(),
+    keyStorage: z.string().optional(),
+    keyCoolingSystem: z.string().optional(),
+    keyMoveInStatus: z.string().optional(),
+    purpose: z.string().optional(),
+    referenceNumber: z.string().optional(),
+    furnishing: z.string().optional(),
+    addedOn: z.string().optional(),
+    originalPrice: z.number().optional(),
+    handoverDate: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+interface PropertyFormProps {
+    mode: "create" | "edit";
+    propertyId?: string;
+    initialData?: Property;
+    onSuccess?: () => void;
+}
+
+export function PropertyForm({ mode, propertyId, initialData, onSuccess }: PropertyFormProps) {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+
+    const [existingImages, setExistingImages] = useState<string[]>([]);
+    const [newImages, setNewImages] = useState<File[]>([]);
+    const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
+    const form = useForm<FormValues>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            listingType: "For Sale",
+            bedrooms: 0,
+            bathrooms: 0,
+            area: 0,
+            price: 0,
+        },
+    });
+
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = form;
+
+    useEffect(() => {
+        if (initialData) {
+            reset({
+                title: initialData.title,
+                listingType: initialData.listingType,
+                propertyType: initialData.propertyType,
+                bedrooms: initialData.bedrooms,
+                bathrooms: initialData.bathrooms,
+                area: initialData.area,
+                description: initialData.description || "",
+                location: initialData.location,
+                price: initialData.price,
+                builtUp: initialData.builtUp,
+                plot: initialData.plot,
+                keyBedRooms: initialData.keyBedRooms,
+                keyBathrooms: initialData.keyBathrooms,
+                keyBuiltUp: initialData.keyBuiltUp,
+                keyKitchenType: initialData.keyKitchenType,
+                keyParking: initialData.keyParking,
+                keyFinishes: initialData.keyFinishes,
+                keyBalconyType: initialData.keyBalconyType,
+                keyStorage: initialData.keyStorage,
+                keyCoolingSystem: initialData.keyCoolingSystem,
+                keyMoveInStatus: initialData.keyMoveInStatus,
+                purpose: initialData.purpose,
+                referenceNumber: initialData.referenceNumber,
+                furnishing: initialData.furnishing,
+                addedOn: initialData.addedOn,
+                originalPrice: initialData.originalPrice,
+                handoverDate: initialData.handoverDate,
+            });
+            setExistingImages(initialData.images || []);
+            setSelectedAmenities(initialData.propertyCommunityAmenities || []);
+        }
+    }, [initialData, reset]);
+
+    const createMutation = useMutation({
+        mutationFn: (fd: FormData) => createProperty(fd),
+        onSuccess: () => {
+            toast.success("Property created successfully");
+            queryClient.invalidateQueries({ queryKey: propertyKeys.myList() });
+            onSuccess?.();
+        },
+        onError: () => toast.error("Failed to create property"),
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: (fd: FormData) => updateProperty(propertyId!, fd),
+        onSuccess: () => {
+            toast.success("Property updated successfully");
+            queryClient.invalidateQueries({ queryKey: propertyKeys.detail(propertyId!) });
+            queryClient.invalidateQueries({ queryKey: propertyKeys.myList() });
+            onSuccess?.();
+        },
+        onError: () => toast.error("Failed to update property"),
+    });
+
+    const onSubmit = (data: FormValues) => {
+        // Sanitize numeric fields: handle NaN from valueAsNumber: true for empty optional fields
+        const sanitizedData = { ...data };
+        const numericFields: (keyof FormValues)[] = [
+            'bedrooms', 'bathrooms', 'area', 'price',
+            'builtUp', 'plot', 'keyBuiltUp', 'originalPrice'
+        ];
+
+        numericFields.forEach(field => {
+            if (typeof sanitizedData[field] === 'number' && isNaN(sanitizedData[field] as number)) {
+                delete sanitizedData[field];
+            }
+        });
+
+        const formDataObj: PropertyFormData = {
+            ...sanitizedData,
+            images: newImages,
+            propertyCommunityAmenities: selectedAmenities,
+        } as PropertyFormData;
+
+        const fd = buildPropertyFormData(formDataObj);
+
+        // Add existing images to formData if in edit mode
+        if (mode === "edit") {
+            existingImages.forEach(img => fd.append("images", img));
+        }
+
+        if (mode === "create") {
+            createMutation.mutate(fd);
+        } else {
+            updateMutation.mutate(fd);
+        }
+    };
+
+    const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 pb-20">
+            {/* Section 1: Basic Information */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Basic Information</h3>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Property Title</Label>
+                        <Input {...register("title")} placeholder="Modern 3-Bedroom Apartment in Westland's" />
+                        {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Property Type</Label>
+                        <Select
+                            onValueChange={(val) => setValue("propertyType", val)}
+                            value={watch("propertyType")}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Property Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Apartment">Apartment</SelectItem>
+                                <SelectItem value="Studio">Studio</SelectItem>
+                                <SelectItem value="Penthouse">Penthouse</SelectItem>
+                                <SelectItem value="Duplex">Duplex</SelectItem>
+                                <SelectItem value="Condo">Condo</SelectItem>
+                                <SelectItem value="Bungalow">Bungalow</SelectItem>
+                                <SelectItem value="Cottage">Cottage</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {errors.propertyType && <p className="text-xs text-red-500">{errors.propertyType.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Listing Type</Label>
+                        <Select
+                            onValueChange={(val) => setValue("listingType", val as "For Sale" | "For Rent")}
+                            value={watch("listingType")}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Listing Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="For Sale">For Sale</SelectItem>
+                                <SelectItem value="For Rent">For Rent</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Section 2: Property Details */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="space-y-2">
+                        <Label>Bedrooms</Label>
+                        <Input type="number" {...register("bedrooms", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Bathrooms</Label>
+                        <Input type="number" {...register("bathrooms", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Built-up (sq ft)</Label>
+                        <Input type="number" {...register("builtUp", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Plot (sq ft)</Label>
+                        <Input type="number" {...register("plot", { valueAsNumber: true })} />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea
+                        {...register("description")}
+                        placeholder="Describe the property features, amenities, and unique selling points..."
+                        className="min-h-[150px]"
+                    />
+                </div>
+            </div>
+
+            {/* Section 3: Key Property Highlights */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Key Property Highlights</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div className="space-y-2">
+                        <Label>Bedrooms</Label>
+                        <Input {...register("keyBedRooms")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Bathrooms</Label>
+                        <Input {...register("keyBathrooms")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Built-up (sq ft)</Label>
+                        <Input type="number" {...register("keyBuiltUp", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Kitchen Type</Label>
+                        <Input {...register("keyKitchenType")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Parking</Label>
+                        <Input {...register("keyParking")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Finishes</Label>
+                        <Input {...register("keyFinishes")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Balcony Type</Label>
+                        <Input {...register("keyBalconyType")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Storage</Label>
+                        <Input {...register("keyStorage")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Cooling System</Label>
+                        <Input {...register("keyCoolingSystem")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Move-in Status</Label>
+                        <Input {...register("keyMoveInStatus")} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Section 4: Property & Community Amenities */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property & Community Amenities</h3>
+                <AmenitiesChecklist
+                    selected={selectedAmenities}
+                    onChange={setSelectedAmenities}
+                />
+            </div>
+
+            {/* Section 5: Property Information */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div className="space-y-2">
+                        <Label>Purpose</Label>
+                        <Input {...register("purpose")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Reference Number</Label>
+                        <Input {...register("referenceNumber")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Furnishing</Label>
+                        <Input {...register("furnishing")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Added On</Label>
+                        <Input {...register("addedOn")} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Original Price</Label>
+                        <Input type="number" {...register("originalPrice", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Handover Date</Label>
+                        <Input {...register("handoverDate")} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Section 6: Location & Price */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Location & Price</h3>
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <Label>Location</Label>
+                        <Input {...register("location")} placeholder="Nairobi, Westlands, Riverside Drive" />
+                        {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Price (KSh)</Label>
+                        <Input type="number" {...register("price", { valueAsNumber: true })} />
+                        {errors.price && <p className="text-xs text-red-500">{errors.price.message}</p>}
+                    </div>
+                    {/* Technical Area for API consistency */}
+                    <div className="space-y-2">
+                        <Label>Area (sq ft) - required for system</Label>
+                        <Input type="number" {...register("area", { valueAsNumber: true })} />
+                        {errors.area && <p className="text-xs text-red-500">{errors.area.message}</p>}
+                    </div>
+                </div>
+            </div>
+
+            {/* Section 7: Property Images */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Images</h3>
+                <PropertyImageUpload
+                    existingImages={existingImages}
+                    newImages={newImages}
+                    onExistingRemove={(url) => setExistingImages(prev => prev.filter(i => i !== url))}
+                    onNewRemove={(idx) => setNewImages(prev => prev.filter((_, i) => i !== idx))}
+                    onNewAdd={(files) => setNewImages(prev => [...prev, ...files])}
+                />
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-end gap-4">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    className="px-10 h-12 rounded-lg border-red-500 text-red-500 hover:bg-red-50"
+                >
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-10 h-12 rounded-lg bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90"
+                >
+                    {isSubmitting ? "Processing..." : mode === "create" ? "Create Property" : "Save Changes"}
+                </Button>
+            </div>
+        </form>
+    );
+}

@@ -15,7 +15,7 @@ export function PaymentTable({ data, isLoading }: PaymentTableProps) {
         return (
             <div className="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(6,81,237,0.05)] border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-center">
+                    <table className="w-full text-base text-center">
                         <thead className="bg-[#f8fafc] text-xs font-semibold text-gray-500 border-b border-gray-100 h-12">
                             <tr>
                                 <th className="px-6 py-3 font-medium">Transaction ID</th>
@@ -59,7 +59,7 @@ export function PaymentTable({ data, isLoading }: PaymentTableProps) {
     return (
         <div className="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(6,81,237,0.05)] border border-gray-100 overflow-hidden">
             <div className="overflow-x-auto">
-                <table className="w-full text-sm text-center whitespace-nowrap">
+                <table className="w-full text-base text-center whitespace-nowrap">
                     <thead className="bg-[#eef2f6] text-xs font-semibold text-gray-600 border-b border-gray-100 h-12">
                         <tr>
                             <th className="px-6 py-3 font-medium tracking-wide">Transaction ID</th>

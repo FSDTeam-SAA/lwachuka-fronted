@@ -67,8 +67,8 @@ export function ListingTable({ data, isLoading }: ListingTableProps) {
     return (
         <div className="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(6,81,237,0.05)] border border-gray-100 overflow-hidden">
             <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left whitespace-nowrap">
-                    <thead className="bg-[#f8fafc] text-xs uppercase text-gray-500 font-semibold border-b border-gray-100">
+                <table className="w-full text-base text-left whitespace-nowrap">
+                    <thead className="bg-[#f8fafc] text-sm uppercase text-gray-500 font-semibold border-b border-gray-100">
                         <tr>
                             <th className="px-6 py-4 font-semibold text-gray-600">Title</th>
                             <th className="px-6 py-4 font-semibold text-gray-600">Location</th>

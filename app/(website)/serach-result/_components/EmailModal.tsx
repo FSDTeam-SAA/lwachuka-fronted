@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 type ListingMini = {
   id: number | string;
@@ -34,8 +35,8 @@ export default function EmailModal({ open, onOpenChange, listing }: EmailModalPr
     ? `Email about ${listing.title}`
     : "Email Agent";
 
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTZiZjRhNDA1Y2MxYThjNDU4YTM1ZiIsImVtYWlsIjoidXNlckBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3Mjk2ODM4NSwiZXhwIjoxNzczNTczMTg1fQ.bZoc3EWCqSjA1abkwRIAf7Vo-MGltLo_kQxAEiUbS2o"
-
+   const session=useSession()
+   const token=session.data?.user?.accessToken
   const mutation = useMutation({
     mutationFn: async (payload: {
       listingId: string;

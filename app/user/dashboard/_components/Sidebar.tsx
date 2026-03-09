@@ -62,13 +62,15 @@ export function Sidebar() {
         {/* Logo + Close */}
         <div className="h-[80px] flex items-center justify-center relative px-4">
           <div>
+            <Link href="/">
             <Image
-              src="/images/logo.png"
+              src="/logo.png"
               alt="Logo"
-              width={120}
-              height={120}
-              className="object-contain"
+              width={1000}
+              height={1000}
+              className="object-cover w-[120px] h-[75px] z-50 "
             />
+            </Link>
           </div>
 
           {isMobileMenuOpen && (

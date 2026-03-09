@@ -14,6 +14,8 @@ import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { BookingStatus } from '@/types/calendar'
 
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
+
 export default function SiteVisitCalendarPage() {
   const { data: session } = useSession()
   const token = session?.user?.accessToken
@@ -73,10 +75,10 @@ export default function SiteVisitCalendarPage() {
   // If no date is selected or filtered list is empty, show all pending
   const filteredBookings = selectedDate
     ? data?.data.filter(
-        (b) =>
-          format(new Date(b.moveInData), 'yyyy-MM-dd') ===
-          format(selectedDate, 'yyyy-MM-dd')
-      ) || []
+      (b) =>
+        format(new Date(b.moveInData), 'yyyy-MM-dd') ===
+        format(selectedDate, 'yyyy-MM-dd')
+    ) || []
     : data?.data || []
 
   const displayBookings =
@@ -85,33 +87,31 @@ export default function SiteVisitCalendarPage() {
       : data?.data || []
 
   return (
-    <div className="p-8 max-w-full mx-auto">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0D1B2A] mb-1">
-          Site Visit Calendar
-        </h1>
-        <p className="text-sm text-gray-500">
-          Manage site visit requests from potential buyers and renters
-        </p>
+    <div className="min-h-screen">
+      <DashboardHeader
+        title="Site Visit Calendar"
+        subtitle="Manage site visit requests from potential buyers and renters"
+      />
+
+      <div className="p-8 max-w-full mx-auto">
+
+        {/* Calendar Grid */}
+        <CalendarGrid
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          bookedDates={bookedDates}
+        />
+
+        {/* Upcoming Visits List */}
+        <UpcomingSiteVisits
+          bookings={displayBookings}
+          isLoading={isLoading}
+          selectedDate={selectedDate}
+          pendingBookingId={pendingBookingId}
+          onApprove={handleApprove}
+          onDecline={handleDecline}
+        />
       </div>
-
-      {/* Calendar Grid */}
-      <CalendarGrid
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
-        bookedDates={bookedDates}
-      />
-
-      {/* Upcoming Visits List */}
-      <UpcomingSiteVisits
-        bookings={displayBookings}
-        isLoading={isLoading}
-        selectedDate={selectedDate}
-        pendingBookingId={pendingBookingId}
-        onApprove={handleApprove}
-        onDecline={handleDecline}
-      />
     </div>
   )
 }
