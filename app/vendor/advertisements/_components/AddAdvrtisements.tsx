@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -27,6 +28,9 @@ import { ChevronLeft, ChevronRight, Upload, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Header from "../../_components/Header";
 import Image from "next/image";
+import { useMutation } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 // ─── Schema ────────────────────────────────────────────────────────────────
 
@@ -34,7 +38,6 @@ const formSchema = z.object({
   campaignName: z.string().min(3, "Campaign name is required"),
   adType: z.string().min(1, "Please select ad type"),
   ctaUrl: z.string().url().optional(),
-  // enforce File instances so FormValues.media becomes File[]
   media: z.array(z.instanceof(File)).min(1, "Upload at least one media file"),
   regions: z.array(z.string()).min(1, "Select at least one region"),
   audience: z.array(z.string()).min(1, "Select at least one audience group"),
@@ -97,10 +100,71 @@ export default function AddAdvrtisements() {
     if (step > 1) setStep(step - 1);
   };
 
+  const session = useSession();
+  const TOKEN = session?.data?.user?.accessToken;
+
+  // ─── Add Advertisement Mutation ─────────────────────────────────────────────
+  const addADVmutation = useMutation({
+    mutationFn: async (data: FormValues) => {
+      const formData = new FormData();
+
+      // ✅ API field names
+      formData.append("companyName", data.campaignName);
+      formData.append("advertisementType", data.adType);
+      if (data.ctaUrl) formData.append("callToActionURL", data.ctaUrl);
+      formData.append("compaingBudget", data.budget);
+
+      // ✅ duration as plain number string e.g. "30"
+      formData.append("compaingDuration", data.duration);
+
+      // ✅ startDate as ISO string
+      formData.append("startDate", new Date(data.startDate).toISOString());
+
+      // ✅ endDate calculated from startDate + duration days
+      const end = new Date(data.startDate);
+      end.setDate(end.getDate() + parseInt(data.duration));
+      formData.append("endDate", end.toISOString());
+
+      // ✅ Payment Status
+      formData.append("paymentStatus", "Paid");
+
+      // ✅ targetRegions & targetAudience as JSON array string
+      // e.g. '["Nairobi","Nakuru"]'
+      formData.append("targetRegions", JSON.stringify(data.regions));
+      formData.append("targetAudience", JSON.stringify(data.audience));
+
+      // ✅ media files
+      data.media.forEach((file) => formData.append("uploadMedia", file));
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/advertisement`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to create advertisement");
+      }
+
+      return res.json();
+    },
+    onSuccess: (res) => {
+      toast.success("Campaign successfully submitted!");
+      console.log("API Response:", res);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Something went wrong!");
+      console.error(err);
+    },
+  });
+
   const onSubmit = (data: FormValues) => {
-    console.log("Final data:", data);
-    // এখানে API call করতে পারো (fetch / axios)
-    alert("Campaign submitted for review!");
+    addADVmutation.mutate(data);
   };
 
   const getFieldsForStep = (step: number): (keyof FormValues)[] => {
@@ -129,44 +193,47 @@ export default function AddAdvrtisements() {
       <div className="mt-10">
         {/* Progress Bar */}
         <div className="mb-8 max-w-6xl mx-auto">
-  <div className="flex items-center">
-    {steps.map((s, index) => (
-      <div key={s.id} className="flex items-center flex-1">
-        {/* Step Circle + Label */}
-        <div className="flex flex-col items-center">
-          <div
-            className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center text-base font-bold transition-all",
-              step >= s.id
-                ? "bg-primary text-primary-foreground"
-                : "bg-[#E9EAEB] text-muted-foreground",
-            )}
-          >
-            {step > s.id ? <Check className="h-4 w-4" /> : `0${s.id}`}
-          </div>
-          <span
-            className={cn(
-              "mt-2 text-xs text-center whitespace-nowrap",
-              step >= s.id ? "text-primary font-medium" : "text-muted-foreground",
-            )}
-          >
-            {s.name}
-          </span>
-        </div>
+          <div className="flex items-center">
+            {steps.map((s, index) => (
+              <div key={s.id} className="flex items-center flex-1">
+                {/* Step Circle + Label */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center text-base font-bold transition-all",
+                      step >= s.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-[#E9EAEB] text-muted-foreground",
+                    )}
+                  >
+                    {step > s.id ? <Check className="h-4 w-4" /> : `0${s.id}`}
+                  </div>
+                  <span
+                    className={cn(
+                      "mt-2 text-xs text-center whitespace-nowrap",
+                      step >= s.id
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {s.name}
+                  </span>
+                </div>
 
-        {/* Connector Line */}
-        {index < steps.length - 1 && (
-          <div
-            className="flex-1 h-[2px] mx-3 self-start mt-6 transition-all"
-            style={{
-              background: step > s.id ? "hsl(var(--primary))" : "#E9EAEB",
-            }}
-          />
-        )}
-      </div>
-    ))}
-  </div>
-</div>
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <div
+                    className="flex-1 h-[2px] mx-3 self-start mt-6 transition-all"
+                    style={{
+                      background:
+                        step > s.id ? "hsl(var(--primary))" : "#E9EAEB",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="p-6">
           <Card className="border-2 shadow-lg">
@@ -365,6 +432,7 @@ export default function AddAdvrtisements() {
                     </div>
                   </div>
                 )}
+
                 {/* ─── STEP 3 ──────────────────────────────────────── */}
                 {step === 3 && (
                   <div className="space-y-8">
@@ -378,12 +446,12 @@ export default function AddAdvrtisements() {
                       </p>
                       <div className="grid grid-cols-3 gap-3">
                         {[
-                          "Northeast",
-                          "Southeast",
-                          "Midwest",
-                          "Southwest",
-                          "West Coast",
-                          "Pacific Northwest",
+                          "Nairobi",
+                          "Nakuru",
+                          "Mombasa",
+                          "Kisumu",
+                          "Eldoret",
+                          "Thika",
                         ].map((r) => {
                           const isChecked = currentValues.regions.includes(r);
                           return (
@@ -400,7 +468,6 @@ export default function AddAdvrtisements() {
                               className={`cursor-pointer rounded-lg border-2 px-4 py-3 flex items-center gap-3 transition-all select-none
                 ${isChecked ? "border-primary bg-primary/5" : "border-muted hover:border-primary/40 bg-white"}`}
                             >
-                              {/* Custom checkbox */}
                               <div
                                 className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all
                 ${isChecked ? "bg-primary border-primary" : "border-gray-300"}`}
@@ -443,12 +510,12 @@ export default function AddAdvrtisements() {
                       </p>
                       <div className="grid grid-cols-3 gap-3">
                         {[
-                          "Real Estate Agents",
-                          "Property Managers",
-                          "Home Buyers",
-                          "Home Sellers",
+                          "Buyers",
+                          "Families",
                           "Investors",
                           "Renters",
+                          "Agents",
+                          "Sellers",
                         ].map((a) => {
                           const isChecked = currentValues.audience.includes(a);
                           return (
@@ -467,7 +534,6 @@ export default function AddAdvrtisements() {
                               className={`cursor-pointer rounded-lg border-2 px-4 py-3 flex items-center gap-3 transition-all select-none
                 ${isChecked ? "border-primary bg-primary/5" : "border-muted hover:border-primary/40 bg-white"}`}
                             >
-                              {/* Custom checkbox */}
                               <div
                                 className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all
                 ${isChecked ? "bg-primary border-primary" : "border-gray-300"}`}
@@ -570,7 +636,7 @@ export default function AddAdvrtisements() {
                       )}
                     </div>
 
-                    {/* Payment Method - Radio style cards */}
+                    {/* Payment Method */}
                     <div>
                       <Label className="font-medium">Payment Method *</Label>
                       <div className="mt-2 space-y-2">
@@ -595,7 +661,6 @@ export default function AddAdvrtisements() {
                               className={`cursor-pointer rounded-lg border px-4 h-[48px] flex items-center gap-3 transition-all select-none
                 ${isSelected ? "border-primary bg-primary/5" : "border-muted hover:border-primary/40 bg-white"}`}
                             >
-                              {/* Custom radio */}
                               <div
                                 className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
                 ${isSelected ? "border-primary" : "border-gray-300"}`}
@@ -710,10 +775,10 @@ export default function AddAdvrtisements() {
               ) : (
                 <Button
                   onClick={handleSubmit(onSubmit)}
-                  disabled={!isValid}
+                  disabled={!isValid || addADVmutation.isPending}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  Publish Campaign
+                  {addADVmutation.isPending ? "Publishing..." : "Publish Campaign"}
                 </Button>
               )}
             </CardFooter>

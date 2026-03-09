@@ -11,6 +11,7 @@ interface BookingCardProps {
     isPending: boolean;
     onApprove: (id: string, currentStatus: BookingStatus) => void;
     onDecline: (id: string, currentStatus: BookingStatus) => void;
+    onRevert?: (id: string, newStatus: BookingStatus) => void;
 }
 
 export function BookingCard({
@@ -18,6 +19,7 @@ export function BookingCard({
     isPending,
     onApprove,
     onDecline,
+    onRevert,
 }: BookingCardProps) {
     const { property, user, moveInData } = booking;
 
@@ -70,22 +72,43 @@ export function BookingCard({
             </div>
 
             {/* Action Buttons */}
-            <div className="p-5 pt-0 mt-auto grid grid-cols-2 gap-3">
-                <Button
-                    onClick={() => onApprove(booking._id, booking.status)}
-                    disabled={isPending}
-                    className="w-full bg-[#0D1B2A] text-white hover:bg-[#1A3A5C]"
-                >
-                    {isPending && booking.status === "pending" ? "Approving..." : "Approve"}
-                </Button>
-                <Button
-                    onClick={() => onDecline(booking._id, booking.status)}
-                    disabled={isPending}
-                    variant="outline"
-                    className="w-full border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
-                >
-                    {isPending && booking.status === "pending" ? "Declining..." : "Decline"}
-                </Button>
+            <div className="p-5 pt-0 mt-auto">
+                {booking.status === "approved" ? (
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-green-50 text-green-700 font-medium text-center py-2 rounded-md border border-green-100 flex items-center justify-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            Approved
+                        </div>
+                        {onRevert && (
+                            <Button
+                                onClick={() => onRevert(booking._id, "pending")}
+                                disabled={isPending}
+                                variant="outline"
+                                className="shrink-0"
+                            >
+                                {isPending ? "Editing..." : "Edit Status"}
+                            </Button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button
+                            onClick={() => onApprove(booking._id, booking.status)}
+                            disabled={isPending}
+                            className="w-full bg-[#0D1B2A] text-white hover:bg-[#1A3A5C]"
+                        >
+                            {isPending && booking.status === "pending" ? "Approving..." : "Approve"}
+                        </Button>
+                        <Button
+                            onClick={() => onDecline(booking._id, booking.status)}
+                            disabled={isPending}
+                            variant="outline"
+                            className="w-full border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
+                        >
+                            {isPending && booking.status === "pending" ? "Declining..." : "Decline"}
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );
