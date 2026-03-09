@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { Heart, Bed, Bath } from "lucide-react";
+import {  Bed, Bath } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface PropertyCardProps {
   image: string;
@@ -9,14 +10,17 @@ interface PropertyCardProps {
   price: string;
   beds: number;
   baths: number;
-  builtUpSqft?: string; // "1,976 sqft"
-  plotSqft?: string; // "2,268 sqft"
-  tagline?: string; // "Genuine Resale | End Unit | Luxurious"
+  builtUpSqft?: string; 
+  plotSqft?: number; 
+  tagline?: string; 
   status?: "For Sale" | "For Rent";
-  availability?: string; // "Available"
+  availability?: string; 
+  id?: string
+
 }
 
 export function PropertyCard({
+  id,
   image,
   title,
   location,
@@ -24,7 +28,7 @@ export function PropertyCard({
   beds,
   baths,
   builtUpSqft = "1,976 sqft",
-  plotSqft = "2,268 sqft",
+  plotSqft ,
   tagline = "Genuine Resale | End Unit | Luxurious",
   status = "For Sale",
   availability = "Available",
@@ -49,13 +53,13 @@ export function PropertyCard({
         </div>
 
         {/* Heart */}
-        <button
+        {/* <button
           type="button"
           aria-label="Add to wishlist"
           className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/95 shadow"
         >
           <Heart className="h-5 w-5 text-[#0B2B4B]" />
-        </button>
+        </button> */}
       </div>
 
       {/* Body */}
@@ -118,10 +122,11 @@ export function PropertyCard({
         <p className="mt-4 text-[15px] font-medium text-[#2E353A]">
           {tagline}
         </p>
-
+        <Link href={`/property-buy/${id}`}>
         <Button className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
           View Details
         </Button>
+        </Link>
       </div>
     </div>
   );

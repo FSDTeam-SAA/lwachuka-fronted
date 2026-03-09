@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import api from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,7 @@ const resetPasswordSchema = z.object({
 });
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
-
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get("email") || "";
@@ -58,8 +57,8 @@ export default function ResetPasswordPage() {
             } else {
                 setError(res.data.message || "Failed to reset password");
             }
-        } catch (err: any) {
-            setError(err?.response?.data?.message || "An unexpected error occurred. Please try again.");
+        } catch {
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -150,5 +149,17 @@ export default function ResetPasswordPage() {
                 </Button>
             </form>
         </div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={
+            <div className="w-full flex items-center justify-center py-12">
+                <Loader2 className="animate-spin h-8 w-8 text-[#0B2341]" />
+            </div>
+        }>
+            <ResetPasswordContent />
+        </Suspense>
     );
 }

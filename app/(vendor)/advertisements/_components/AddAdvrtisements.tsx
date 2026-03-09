@@ -208,7 +208,7 @@ export default function AddAdvrtisements() {
                     <div>
                       <Label>Advertisement Type *</Label>
                       <Select
-                        onValueChange={(val) =>
+                        onValueChange={(val: string) =>
                           setValue("adType", val, { shouldValidate: true })
                         }
                         value={currentValues.adType}
@@ -530,7 +530,7 @@ export default function AddAdvrtisements() {
                     <div>
                       <Label className="font-medium">Campaign Duration *</Label>
                       <Select
-                        onValueChange={(val) =>
+                        onValueChange={(val: string) =>
                           setValue("duration", val, { shouldValidate: true })
                         }
                         value={currentValues.duration}
@@ -587,11 +587,11 @@ export default function AddAdvrtisements() {
                           return (
                             <div
                               key={method.value}
-                              onClick={() =>
+                              onClick={() => {
                                 setValue("paymentMethod", method.value, {
                                   shouldValidate: true,
-                                })
-                              }
+                                });
+                              }}
                               className={`cursor-pointer rounded-lg border px-4 h-[48px] flex items-center gap-3 transition-all select-none
                 ${isSelected ? "border-primary bg-primary/5" : "border-muted hover:border-primary/40 bg-white"}`}
                             >
