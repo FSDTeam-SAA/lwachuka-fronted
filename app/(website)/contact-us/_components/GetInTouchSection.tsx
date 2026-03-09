@@ -1,105 +1,109 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import Link from "next/link";
-import { toast } from "sonner";  
+import { useState } from 'react'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import Link from 'next/link'
+import { toast } from 'sonner'
 interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  message: string;
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  message: string
 }
 
 export function GetInTouchSection() {
   const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    message: '',
+  })
 
-  const [agreed, setAgreed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Basic client-side validation
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      toast.error("Please enter both first and last name");
-      return;
+      toast.error('Please enter both first and last name')
+      return
     }
-    if (!formData.email.includes("@")) {
-      toast.error("Please enter a valid email address");
-      return;
+    if (!formData.email.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
     }
     if (!formData.message.trim()) {
-      toast.error("Message cannot be empty");
-      return;
+      toast.error('Message cannot be empty')
+      return
     }
     if (!agreed) {
-      toast.error("You must agree to the Terms & Conditions");
-      return;
+      toast.error('You must agree to the Terms & Conditions')
+      return
     }
 
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/contact`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/contact`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firstName: formData.firstName.trim(),
+            lastName: formData.lastName.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+            message: formData.message.trim(),
+          }),
         },
-        body: JSON.stringify({
-          firstName: formData.firstName.trim(),
-          lastName: formData.lastName.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim(),
-          message: formData.message.trim(),
-        }),
-      });
+      )
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
         // You can use result.message if your API returns it
-        throw new Error(result.message || "Something went wrong");
+        throw new Error(result.message || 'Something went wrong')
       }
 
       toast.success("Message sent successfully! We'll get back to you soon.", {
         duration: 5000,
-      });
+      })
 
       setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        message: "",
-      });
-      setAgreed(false);
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        message: '',
+      })
+      setAgreed(false)
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      toast.error(err.message || "Failed to send message. Please try again.");
-      console.error(err);
+      toast.error(err.message || 'Failed to send message. Please try again.')
+      console.error(err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <section className="py-10 md:py-14">
@@ -192,18 +196,18 @@ export function GetInTouchSection() {
                   <Checkbox
                     id="terms"
                     checked={agreed}
-                    onCheckedChange={(checked) => setAgreed(!!checked)}
+                    onCheckedChange={checked => setAgreed(!!checked)}
                     className="mt-0.5"
                   />
                   <label
                     htmlFor="terms"
                     className="text-[11px] leading-5 text-[#8A8A8A]"
                   >
-                    You agree to our{" "}
+                    You agree to our{' '}
                     <Link href="#" className="text-[#0B1C39] underline">
                       Terms & Conditions
-                    </Link>{" "}
-                    and{" "}
+                    </Link>{' '}
+                    and{' '}
                     <Link href="#" className="text-[#0B1C39] underline">
                       Privacy Policy
                     </Link>
@@ -216,7 +220,7 @@ export function GetInTouchSection() {
                   disabled={isLoading}
                   className="mt-2 h-11 w-full rounded-md bg-[#05203D] hover:bg-[#05203D]/90 text-white disabled:opacity-70"
                 >
-                  {isLoading ? "Sending..." : "Send Message"}
+                  {isLoading ? 'Sending...' : 'Send Message'}
                 </Button>
               </form>
             </div>
@@ -236,5 +240,5 @@ export function GetInTouchSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }

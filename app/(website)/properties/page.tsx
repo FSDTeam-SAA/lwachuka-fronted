@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { PropertyListingsSection } from './_components/PropertyListingsSection'
 
 const page = () => {
   return (
     <div>
-      <PropertyListingsSection/>
+      <Suspense fallback={<div>Loading properties...</div>}>
+        <PropertyListingsSection />
+      </Suspense>
     </div>
   )
 }

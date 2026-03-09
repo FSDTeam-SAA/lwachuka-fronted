@@ -1,6 +1,7 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 import {
   CalendarDays,
   Eye,
@@ -10,31 +11,30 @@ import {
   User,
   AlertCircle,
   Phone,
-} from "lucide-react";
-
+} from 'lucide-react'
 
 type UpcomingVisit = {
-  id: number;
-  title: string;
-  location: string;
-  date: string;
-  time: string;
-  agent: string;
-  contact: string;
-  note: string;
-  status: "Upcoming";
-};
+  id: number
+  title: string
+  location: string
+  date: string
+  time: string
+  agent: string
+  contact: string
+  note: string
+  status: 'Upcoming'
+}
 
 type PastVisit = {
-  id: number;
-  title: string;
-  location: string;
-  date: string;
-  status: "Completed";
-};
+  id: number
+  title: string
+  location: string
+  date: string
+  status: 'Completed'
+}
 
 function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ')
 }
 
 function StatCard({
@@ -42,9 +42,9 @@ function StatCard({
   label,
   icon,
 }: {
-  value: number;
-  label: string;
-  icon: React.ReactNode;
+  value: number
+  label: string
+  icon: React.ReactNode
 }) {
   return (
     <div className="rounded-2xl border border-[#E9E9E9] bg-white px-4 py-5 shadow-[0_4px_14px_rgba(15,23,42,0.06)] sm:px-5 sm:py-6">
@@ -53,7 +53,9 @@ function StatCard({
           <h3 className="text-[28px] font-bold leading-none text-[#0B2239] sm:text-[32px]">
             {value}
           </h3>
-          <p className="mt-2 text-[12px] text-[#5E6773] sm:text-[13px]">{label}</p>
+          <p className="mt-2 text-[12px] text-[#5E6773] sm:text-[13px]">
+            {label}
+          </p>
         </div>
 
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3FAFF] text-[#0B2239] sm:h-11 sm:w-11">
@@ -61,15 +63,15 @@ function StatCard({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function UpcomingVisitCard({
   item,
   onCancel,
 }: {
-  item: UpcomingVisit;
-  onCancel?: (item: UpcomingVisit) => void;
+  item: UpcomingVisit
+  onCancel?: (item: UpcomingVisit) => void
 }) {
   return (
     <div className="rounded-2xl border border-[#E9E9E9] bg-white p-4 shadow-[0_4px_14px_rgba(15,23,42,0.06)] sm:p-5">
@@ -127,7 +129,7 @@ function UpcomingVisitCard({
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 function PastVisitRow({ item }: { item: PastVisit }) {
@@ -159,93 +161,93 @@ function PastVisitRow({ item }: { item: PastVisit }) {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 export default function SiteVisitsClone() {
-  const [selectedVisit, setSelectedVisit] = useState<UpcomingVisit | null>(null);
+  const [selectedVisit, setSelectedVisit] = useState<UpcomingVisit | null>(null)
 
   const stats = [
     {
       value: 3,
-      label: "Upcoming Visits",
+      label: 'Upcoming Visits',
       icon: <CalendarDays className="h-5 w-5" />,
     },
     {
       value: 1,
-      label: "Completed",
+      label: 'Completed',
       icon: <Eye className="h-5 w-5" />,
     },
     {
       value: 1,
-      label: "Canceled",
+      label: 'Canceled',
       icon: <X className="h-5 w-5" />,
     },
-  ];
+  ]
 
   const upcomingVisits: UpcomingVisit[] = [
     {
       id: 1,
-      title: "3 Bedroom Apartment in Kilimani",
-      location: "Kilimani, Nairobi",
-      date: "Saturday, February 10, 2024",
-      time: "10:00 AM",
-      agent: "Sarah Mwangi",
-      contact: "+254 712 345 678",
-      note: "Bring ID and proof of income",
-      status: "Upcoming",
+      title: '3 Bedroom Apartment in Kilimani',
+      location: 'Kilimani, Nairobi',
+      date: 'Saturday, February 10, 2024',
+      time: '10:00 AM',
+      agent: 'Sarah Mwangi',
+      contact: '+254 712 345 678',
+      note: 'Bring ID and proof of income',
+      status: 'Upcoming',
     },
     {
       id: 2,
-      title: "3 Bedroom Apartment in Kilimani",
-      location: "Kilimani, Nairobi",
-      date: "Saturday, February 10, 2024",
-      time: "10:00 AM",
-      agent: "Sarah Mwangi",
-      contact: "+254 712 345 678",
-      note: "Bring ID and proof of income",
-      status: "Upcoming",
+      title: '3 Bedroom Apartment in Kilimani',
+      location: 'Kilimani, Nairobi',
+      date: 'Saturday, February 10, 2024',
+      time: '10:00 AM',
+      agent: 'Sarah Mwangi',
+      contact: '+254 712 345 678',
+      note: 'Bring ID and proof of income',
+      status: 'Upcoming',
     },
     {
       id: 3,
-      title: "3 Bedroom Apartment in Kilimani",
-      location: "Kilimani, Nairobi",
-      date: "Saturday, February 10, 2024",
-      time: "10:00 AM",
-      agent: "Sarah Mwangi",
-      contact: "+254 712 345 678",
-      note: "Bring ID and proof of income",
-      status: "Upcoming",
+      title: '3 Bedroom Apartment in Kilimani',
+      location: 'Kilimani, Nairobi',
+      date: 'Saturday, February 10, 2024',
+      time: '10:00 AM',
+      agent: 'Sarah Mwangi',
+      contact: '+254 712 345 678',
+      note: 'Bring ID and proof of income',
+      status: 'Upcoming',
     },
-  ];
+  ]
 
   const pastVisits: PastVisit[] = [
     {
       id: 1,
-      title: "2 Bedroom Townhouse in Lavington",
-      location: "Lavington, Nairobi",
-      date: "Monday, February 5, 2024 at 3:00 PM",
-      status: "Completed",
+      title: '2 Bedroom Townhouse in Lavington',
+      location: 'Lavington, Nairobi',
+      date: 'Monday, February 5, 2024 at 3:00 PM',
+      status: 'Completed',
     },
     {
       id: 2,
-      title: "2 Bedroom Townhouse in Lavington",
-      location: "Lavington, Nairobi",
-      date: "Monday, February 5, 2024 at 3:00 PM",
-      status: "Completed",
+      title: '2 Bedroom Townhouse in Lavington',
+      location: 'Lavington, Nairobi',
+      date: 'Monday, February 5, 2024 at 3:00 PM',
+      status: 'Completed',
     },
-  ];
+  ]
 
   const handleCancel = (id: number) => {
-    console.log("Cancel visit:", id);
-  };
+    console.log('Cancel visit:', id)
+  }
 
   return (
     <section className="w-full bg-[#F8F8F8]">
       <div className="mx-auto container px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         {/* Top stat cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {stats.map((item) => (
+          {stats.map(item => (
             <StatCard
               key={item.label}
               value={item.value}
@@ -262,7 +264,7 @@ export default function SiteVisitsClone() {
           </h2>
 
           <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-            {upcomingVisits.map((item) => (
+            {upcomingVisits.map(item => (
               <UpcomingVisitCard
                 key={item.id}
                 item={item}
@@ -279,7 +281,7 @@ export default function SiteVisitsClone() {
           </h2>
 
           <div className="mt-4 space-y-4">
-            {pastVisits.map((item) => (
+            {pastVisits.map(item => (
               <PastVisitRow key={item.id} item={item} />
             ))}
           </div>
@@ -314,35 +316,45 @@ export default function SiteVisitsClone() {
                   <MapPin className="mt-0.5 h-3.5 w-3.5 text-[#8B8F97]" />
                   <div>
                     <div className="text-[16px] text-[#6A7282]">Location</div>
-                    <div className="text-[#101828] text-base">{selectedVisit.location}</div>
+                    <div className="text-[#101828] text-base">
+                      {selectedVisit.location}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <CalendarDays className="mt-0.5 h-3.5 w-3.5 text-[#8B8F97]" />
                   <div>
                     <div className="text-[16px] text-[#6A7282]">Date</div>
-                    <div className="text-[#101828] text-base">{selectedVisit.date}</div>
+                    <div className="text-[#101828] text-base">
+                      {selectedVisit.date}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Clock3 className="mt-0.5 h-3.5 w-3.5 text-[#8B8F97]" />
                   <div>
                     <div className="text-[16px] text-[#6A7282]">Time</div>
-                    <div className="text-[#101828] text-base">{selectedVisit.time}</div>
+                    <div className="text-[#101828] text-base">
+                      {selectedVisit.time}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <User className="mt-0.5 h-3.5 w-3.5 text-[#8B8F97]" />
                   <div>
                     <div className="text-[16px] text-[#6A7282]">Agent</div>
-                    <div className="text-[#101828] text-base">{selectedVisit.agent}</div>
+                    <div className="text-[#101828] text-base">
+                      {selectedVisit.agent}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Phone className="mt-0.5 h-3.5 w-3.5 text-[#8B8F97]" />
                   <div>
                     <div className="text-[16px] text-[#6A7282]">Contact</div>
-                    <div className="text-[#101828] text-base">{selectedVisit.contact}</div>
+                    <div className="text-[#101828] text-base">
+                      {selectedVisit.contact}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -352,9 +364,7 @@ export default function SiteVisitsClone() {
                   <AlertCircle className="h-3.5 w-3.5 text-[#8B8F97]" />
                   <span>Important Notes</span>
                 </div>
-                <p className="mt-2 text-[16px] text-[]">
-                  {selectedVisit.note}
-                </p>
+                <p className="mt-2 text-[16px] text-[]">{selectedVisit.note}</p>
               </div>
             </div>
 
@@ -369,8 +379,8 @@ export default function SiteVisitsClone() {
                 <button
                   type="button"
                   onClick={() => {
-                    handleCancel(selectedVisit.id);
-                    setSelectedVisit(null);
+                    handleCancel(selectedVisit.id)
+                    setSelectedVisit(null)
                   }}
                   className="flex w-full items-center justify-center rounded-lg bg-[#E5533D] px-4 py-2 text-[13px] font-medium text-white"
                 >
@@ -382,5 +392,5 @@ export default function SiteVisitsClone() {
         </div>
       )}
     </section>
-  );
+  )
 }
