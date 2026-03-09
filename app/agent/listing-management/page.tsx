@@ -7,6 +7,8 @@ import { getMyProperties, listingKeys } from '@/lib/queries/listings'
 import { ListingTable } from '@/components/listing-management/ListingTable'
 import { Pagination } from '@/components/shared/Pagination'
 
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
+
 export default function ListingManagementPage() {
   const { data: session } = useSession()
   const token = session?.user?.accessToken
@@ -22,28 +24,28 @@ export default function ListingManagementPage() {
   const totalItems = data?.meta.total ?? 0
 
   return (
-    <div className="p-8 max-w-full mx-auto">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0D1B2A] mb-1">
-          Listing Management
-        </h1>
-        <p className="text-sm text-gray-500">View all your approved listings</p>
+    <div className="min-h-screen">
+      <DashboardHeader
+        title="Listing Management"
+        subtitle="View all your approved listings"
+      />
+
+      <div className="p-8 max-w-full mx-auto">
+
+        {/* Table Component */}
+        <ListingTable data={data?.data} isLoading={isLoading} />
+
+        {/* Pagination Component */}
+        {!isLoading && totalItems > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+            itemsPerPage={10}
+          />
+        )}
       </div>
-
-      {/* Table Component */}
-      <ListingTable data={data?.data} isLoading={isLoading} />
-
-      {/* Pagination Component */}
-      {!isLoading && totalItems > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-          itemsPerPage={10}
-        />
-      )}
     </div>
   )
 }

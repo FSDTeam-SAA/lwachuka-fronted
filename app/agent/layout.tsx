@@ -8,7 +8,7 @@ export default function AgentLayout({
     return (
         <div className="min-h-screen bg-[#F4F6F8]">
             <Sidebar />
-            <main className="ml-[240px] min-h-screen">
+            <main className="lg:ml-[320px] min-h-screen">
                 {children}
             </main>
         </div>

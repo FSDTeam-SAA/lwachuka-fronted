@@ -1,7 +1,11 @@
 import Image from "next/image";
-import {  Bed, Bath } from "lucide-react";
+import { Bed, Bath, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { deleteProperty, propertyKeys } from "@/lib/queries/properties";
+import { useRouter } from "next/navigation";
 
 interface PropertyCardProps {
   image: string;
@@ -10,13 +14,13 @@ interface PropertyCardProps {
   price: string;
   beds: number;
   baths: number;
-  builtUpSqft?: string; 
-  plotSqft?: number; 
-  tagline?: string; 
+  builtUpSqft?: string;
+  plotSqft?: number;
+  tagline?: string;
   status?: "For Sale" | "For Rent";
-  availability?: string; 
-  id?: string
-
+  availability?: string;
+  id?: string;
+  isAgentView?: boolean;
 }
 
 export function PropertyCard({
@@ -28,13 +32,34 @@ export function PropertyCard({
   beds,
   baths,
   builtUpSqft = "1,976 sqft",
-  plotSqft ,
+  plotSqft,
   tagline = "Genuine Resale | End Unit | Luxurious",
   status = "For Sale",
   availability = "Available",
+  isAgentView = false,
 }: PropertyCardProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteProperty(id),
+    onSuccess: () => {
+      toast.success("Property deleted successfully");
+      queryClient.invalidateQueries({ queryKey: propertyKeys.myList() });
+    },
+    onError: () => toast.error("Failed to delete property"),
+  });
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) {
+      if (id) deleteMutation.mutate(id);
+    }
+  };
+
   return (
-    <div className="w-full max-w-[520px] rounded-[28px] bg-[#EAEAEA] p-6">
+    <div className="w-full max-w-[520px] rounded-[28px] bg-[#EAEAEA] p-6 relative">
       {/* Image */}
       <div className="relative overflow-hidden rounded-[24px] border-2 border-[#0B2B4B]">
         <div className="relative h-[250px] w-full">
@@ -52,14 +77,16 @@ export function PropertyCard({
           {status}
         </div>
 
-        {/* Heart */}
-        {/* <button
-          type="button"
-          aria-label="Add to wishlist"
-          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/95 shadow"
-        >
-          <Heart className="h-5 w-5 text-[#0B2B4B]" />
-        </button> */}
+        {/* Delete Overlay for Agent */}
+        {isAgentView && (
+          <button
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="h-5 w-5 text-red-500" />
+          </button>
+        )}
       </div>
 
       {/* Body */}
@@ -122,11 +149,21 @@ export function PropertyCard({
         <p className="mt-4 text-[15px] font-medium text-[#2E353A]">
           {tagline}
         </p>
-        <Link href={`/property-buy/${id}`}>
-        <Button className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
-          View Details
-        </Button>
-        </Link>
+        {isAgentView ? (
+          <Button
+            onClick={() => router.push(`/agent/my-properties/edit/${id}`)}
+            className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90 flex items-center justify-center gap-2"
+          >
+            <Pencil className="h-4 w-4" />
+            Edit
+          </Button>
+        ) : (
+          <Link href={`/property-buy/${id}`}>
+            <Button className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
+              View Details
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -49,78 +49,80 @@ const quickActions = [
     { label: "View Site Visit Calendar", icon: Calendar, href: "/agent/calendar" },
 ];
 
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+
 export default async function AgentDashboard() {
     const session = await getServerSession(authOptions);
     if (!session) redirect("/login");
 
     return (
-        <div className="p-8">
-            {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-[#0D1B2A]">Dashboard Overview</h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Welcome back! Here&apos;s your property portfolio summary.
-                </p>
-            </div>
+        <div className="min-h-screen">
+            <DashboardHeader
+                title="Dashboard Overview"
+                subtitle="Welcome back! Here's your property portfolio summary."
+            />
 
-            {/* Row 1 — Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-                {statCards.map((card) => (
-                    <Card key={card.title} className="bg-white border border-gray-200 rounded-xl shadow-sm">
-                        <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-xs text-gray-500 font-medium">{card.title}</p>
-                                    <p className="text-4xl font-bold text-[#0D1B2A] mt-2 mb-3">{card.value}</p>
-                                    <p className="text-xs text-gray-400">{card.subtitle}</p>
-                                </div>
-                                <div className="bg-[#F4F6F8] p-2.5 rounded-lg">
-                                    <card.icon className="h-5 w-5 text-[#0D1B2A]" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+            <div className="p-8">
 
-            {/* Listing Performance Overview */}
-            <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                    <TrendingUp className="h-4 w-4 text-[#0D1B2A]" />
-                    <h2 className="text-base font-semibold text-[#0D1B2A]">
-                        Listing Performance Overview
-                    </h2>
-                </div>
-                <p className="text-sm text-gray-500 mb-4">
-                    Your performance metrics for the last 30 days
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {performanceCards.map((card) => (
+                {/* Row 1 — Stat Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                    {statCards.map((card) => (
                         <Card key={card.title} className="bg-white border border-gray-200 rounded-xl shadow-sm">
                             <CardContent className="p-6">
-                                <p className="text-xs text-gray-500 font-medium">{card.title}</p>
-                                <p className="text-3xl font-bold text-[#0D1B2A] mt-2">{card.value}</p>
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-medium">{card.title}</p>
+                                        <p className="text-4xl font-bold text-[#0D1B2A] mt-2 mb-3">{card.value}</p>
+                                        <p className="text-xs text-gray-400">{card.subtitle}</p>
+                                    </div>
+                                    <div className="bg-[#F4F6F8] p-2.5 rounded-lg">
+                                        <card.icon className="h-5 w-5 text-[#0D1B2A]" />
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
-            </div>
 
-            {/* Quick Actions */}
-            <div>
-                <h2 className="text-base font-semibold text-[#0D1B2A] mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {quickActions.map((action) => (
-                        <Link key={action.label} href={action.href}>
-                            <Button
-                                variant="outline"
-                                className="w-full h-[72px] flex flex-col gap-1.5 items-center justify-center border border-gray-200 rounded-xl text-[#0D1B2A] hover:bg-[#F4F6F8] text-sm font-medium"
-                            >
-                                <action.icon className="h-5 w-5 text-[#0D1B2A]" />
-                                {action.label}
-                            </Button>
-                        </Link>
-                    ))}
+                {/* Listing Performance Overview */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-1">
+                        <TrendingUp className="h-4 w-4 text-[#0D1B2A]" />
+                        <h2 className="text-base font-semibold text-[#0D1B2A]">
+                            Listing Performance Overview
+                        </h2>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Your performance metrics for the last 30 days
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {performanceCards.map((card) => (
+                            <Card key={card.title} className="bg-white border border-gray-200 rounded-xl shadow-sm">
+                                <CardContent className="p-6">
+                                    <p className="text-xs text-gray-500 font-medium">{card.title}</p>
+                                    <p className="text-3xl font-bold text-[#0D1B2A] mt-2">{card.value}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div>
+                    <h2 className="text-base font-semibold text-[#0D1B2A] mb-4">Quick Actions</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {quickActions.map((action) => (
+                            <Link key={action.label} href={action.href}>
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-[72px] flex flex-col gap-1.5 items-center justify-center border border-gray-200 rounded-xl text-[#0D1B2A] hover:bg-[#F4F6F8] text-sm font-medium"
+                                >
+                                    <action.icon className="h-5 w-5 text-[#0D1B2A]" />
+                                    {action.label}
+                                </Button>
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
