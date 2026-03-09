@@ -11,7 +11,7 @@ import { PropertyCard } from "@/components/common/PropertyCard";
 import { Property, PropertyApiResponse } from "@/types/PropertyType";
 
 async function fetchSimilarProperties(): Promise<Property[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const url = baseUrl
     ? `${baseUrl}/property/subscriber-property-top?status=approved`
     : "/property/subscriber-property-top?status=approved";

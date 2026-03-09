@@ -10,7 +10,7 @@ import { Property, PropertySingleApiResponse } from "@/types/PropertyType";
 
 const fetchProperty = async (id: string): Promise<Property> => {
   const { data } = await axios.get<PropertySingleApiResponse>(
-    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/property/${id}`
+    `${process.env.NEXT_PUBLIC_API_URL}/property/${id}`
   );
   if (!data.success) throw new Error(data.message || "Failed to load property");
   return data.data;

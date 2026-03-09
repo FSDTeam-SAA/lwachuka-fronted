@@ -37,7 +37,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 async function fetchUsers(role: TabKey): Promise<ApiResponse> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/all-users?role=${role}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/user/all-users?role=${role}`,
     {
       cache: "no-store",
       headers: {

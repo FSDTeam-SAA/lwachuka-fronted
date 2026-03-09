@@ -43,7 +43,7 @@ interface ApiResponse {
 // ────────── API FETCHER────────────────────────────────────────
 const fetchAgentProperties = async (agentId: string): Promise<Property[]> => {
   const response = await axios.get<ApiResponse>(
-    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/property/agent/${agentId}?status=approved`
+    `${process.env.NEXT_PUBLIC_API_URL}/property/agent/${agentId}?status=approved`
   );
 
   if (!response.data.success) {

@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-=======
-"use client";
->>>>>>> f4ed9c33bb5d7640c0e0d7f0bbc9f2ebba56f685
 
 import { CalendarDays, Heart, MessageSquare, Bookmark, CalendarCheck, UserRound } from "lucide-react";
 

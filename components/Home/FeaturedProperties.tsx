@@ -9,7 +9,7 @@ import { Property, PropertyApiResponse } from "@/types/PropertyType";
 
 
 async function fetchFeaturedProperties(): Promise<Property[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/property/subscriber-property-top?status=approved`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/property/subscriber-property-top?status=approved`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

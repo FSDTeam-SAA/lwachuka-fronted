@@ -584,7 +584,7 @@ export default function MyLeadsDashboard() {
   const { data, isLoading, isError, error } = useQuery<Lead[]>({
     queryKey: ["my-leads"],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/contact-property/my-leads`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contact-property/my-leads`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

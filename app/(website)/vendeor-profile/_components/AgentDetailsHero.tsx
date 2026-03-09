@@ -32,7 +32,7 @@ const fallbackAgent = {
 };
 
 async function fetchAgent(userId: string): Promise<Agent> {
-  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/${userId}`);
+  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`);
   return data.data; // we want the nested "data" object
 }
 

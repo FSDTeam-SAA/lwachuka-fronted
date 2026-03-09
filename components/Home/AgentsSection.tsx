@@ -27,7 +27,7 @@ interface ApiResponse {
 }
 
 async function fetchAgents(): Promise<ApiResponse> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/all-users?role=agent`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all-users?role=agent`, {
     cache: "no-store", 
     headers: {
       "Content-Type": "application/json",

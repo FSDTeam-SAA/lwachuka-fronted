@@ -59,7 +59,7 @@ function AdvertisementSkeleton() {
 }
 
 async function fetchAdvertisements(): Promise<Advertisement[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/advertisement`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/advertisement`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

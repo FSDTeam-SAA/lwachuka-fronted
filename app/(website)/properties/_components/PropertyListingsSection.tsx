@@ -26,7 +26,7 @@ interface Property {
 }
 
 async function fetchApprovedProperties(): Promise<Property[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/property/subscriber-property-top?status=approved`); 
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/property/subscriber-property-top?status=approved`); 
 
   if (!res.ok) {
     throw new Error("Failed to fetch properties");
