@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton"; 
 import EmailModal from "@/app/(website)/serach-result/_components/EmailModal";
+import { toast } from "sonner";
 
 // ────────TYPES─────────────────────────────
 interface Property {
@@ -40,6 +41,10 @@ interface ApiResponse {
   data: Property[];
 }
 
+interface Agent {
+  phoneNumber?: string;
+}
+
 // ────────── API FETCHER────────────────────────────────────────
 const fetchAgentProperties = async (agentId: string): Promise<Property[]> => {
   const response = await axios.get<ApiResponse>(
@@ -51,6 +56,13 @@ const fetchAgentProperties = async (agentId: string): Promise<Property[]> => {
   }
 
   return response.data.data;
+};
+
+const fetchAgent = async (agentId: string): Promise<Agent> => {
+  const response = await axios.get<{ data?: Agent }>(
+    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/${agentId}`
+  );
+  return response.data?.data ?? {};
 };
 
 // ─────SKELETON ROW─────────────────────────────────────────────
@@ -99,9 +111,11 @@ const formatPrice = (price: number) => `KSh ${(price / 1_000_000).toFixed(1)}M`;
 function ListingRow({
   property,
   onEmailClick,
+  onWhatsAppClick,
 }: {
   property: Property;
   onEmailClick: (listing: Property) => void;
+  onWhatsAppClick: () => void;
 }) {
   const mainImage = property.images[0] || "/placeholder-property.jpg";
   const priceFormatted = formatPrice(property.price);
@@ -193,7 +207,11 @@ function ListingRow({
               Email
             </Button>
 
-            <Button className="h-10 rounded-md bg-[#061F3D] hover:bg-[#061F3D]/90 text-white">
+            <Button
+              type="button"
+              onClick={onWhatsAppClick}
+              className="h-10 rounded-md bg-[#061F3D] hover:bg-[#061F3D]/90 text-white"
+            >
               <span className="inline-flex items-center gap-2">
                 <Image
                   src="/WhatsApp.png"
@@ -252,11 +270,39 @@ export default function AgentListingsSection() {
     staleTime: 5 * 60 * 1000, 
   });
 
+  const { data: agentData } = useQuery<Agent, Error>({
+    queryKey: ["agent", agentId],
+    queryFn: () => fetchAgent(agentId),
+    enabled: !!agentId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const agentPhone = agentData?.phoneNumber;
+
   const title = `Sarah Wanjiku's Listings (${properties.length})`;
   // ↑ in real app you would fetch agent name too or get it from parent props/context
   const openEmailModal = (listing: Property) => {
     setSelectedListing(listing);
     setEmailOpen(true);
+  };
+
+  const handleWhatsAppClick = () => {
+    const trimmed = agentPhone?.trim() ?? "";
+
+    if (!trimmed) {
+      toast.error("Not available on WhatsApp");
+      return;
+    }
+
+    const normalized = trimmed.replace(/[^\d+]/g, "");
+    const numberForLink = normalized.replace(/^\+/, "");
+
+    if (!numberForLink) {
+      toast.error("Not available on WhatsApp");
+      return;
+    }
+
+    window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
   };
 
   if (isError) {
@@ -301,6 +347,7 @@ export default function AgentListingsSection() {
                 key={property._id}
                 property={property}
                 onEmailClick={openEmailModal}
+                onWhatsAppClick={handleWhatsAppClick}
               />
             ))
           )}

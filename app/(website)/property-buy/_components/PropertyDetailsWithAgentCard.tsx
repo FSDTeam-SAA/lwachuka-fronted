@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import { MapPin, BedDouble, Bath, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/types/PropertyType";
+import { toast } from "sonner";
 
 type AgentLike = {
   firstName?: string;
@@ -11,6 +14,7 @@ type AgentLike = {
   serviceArea?: string;
   approvedPropertyCount?: number;
   experience?: string;
+  phoneNumber?: string;
 };
 
 const formatPrice = (price: number, listingType?: Property["listingType"]) => {
@@ -54,6 +58,26 @@ export function PropertyDetailsWithAgentCard({ property }: { property: Property 
       ? `${rawAgent.approvedPropertyCount} For Sale`
       : "Properties on request";
   const agentExperience = rawAgent?.experience || "Experienced Agent";
+  const agentPhone = rawAgent?.phoneNumber;
+
+  const handleWhatsAppClick = () => {
+    const trimmed = agentPhone?.trim() ?? "";
+
+    if (!trimmed) {
+      toast.error("Not available on WhatsApp");
+      return;
+    }
+
+    const normalized = trimmed.replace(/[^\d+]/g, "");
+    const numberForLink = normalized.replace(/^\+/, "");
+
+    if (!numberForLink) {
+      toast.error("Not available on WhatsApp");
+      return;
+    }
+
+    window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
+  };
 
   const details = [
     property.propertyType && `Type: ${property.propertyType}`,
@@ -208,7 +232,11 @@ export function PropertyDetailsWithAgentCard({ property }: { property: Property 
 
                 </div>
 
-                <Button className="mt-6 w-full h-11 rounded-md bg-[#061F3D] hover:bg-[#061F3D]/90 text-white">
+                <Button
+                  type="button"
+                  onClick={handleWhatsAppClick}
+                  className="mt-6 w-full h-11 rounded-md bg-[#061F3D] hover:bg-[#061F3D]/90 text-white"
+                >
                   <span className="mr-2 inline-flex">
                     <Image
                       src="/WhatsApp.png"
