@@ -23,17 +23,38 @@ export default function SiteVisitCalendarPage() {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  // Fetch pending bookings
-  const { data, isLoading } = useQuery({
-    queryKey: calendarKeys.bookings('pending'),
-    queryFn: () => getAgentBookings('pending', token),
+  const { data: pendingData, isLoading: isPendingLoading } = useQuery({
+    queryKey: calendarKeys.bookings('pending', currentPage),
+    queryFn: () => getAgentBookings('pending', token, currentPage, 4),
     enabled: !!token,
   })
 
+  const { data: approvedData, isLoading: isApprovedLoading } = useQuery({
+    queryKey: calendarKeys.bookings('approved', currentPage),
+    queryFn: () => getAgentBookings('approved', token, currentPage, 4),
+    enabled: !!token,
+  })
+
+  // Combine and sort both pending and approved bookings
+  const allBookings = [
+    ...(pendingData?.data || []),
+    ...(approvedData?.data || []),
+  ].sort((a, b) => new Date(a.moveInData).getTime() - new Date(b.moveInData).getTime())
+
+  const isLoading = isPendingLoading || isApprovedLoading
+
+  // Pagination meta (using pending data's meta as base since we request same page size)
+  // Taking max to ensure we show highest possible pages if one list is longer
+  const pendingMeta = pendingData?.meta || { total: 0 }
+  const approvedMeta = approvedData?.meta || { total: 0 }
+  const totalItems = pendingMeta.total + approvedMeta.total;
+  const totalPages = Math.ceil(totalItems / 4);
+
   // Extract booked dates for calendar indicators
   const bookedDates =
-    data?.data.map((b) => format(new Date(b.moveInData), 'yyyy-MM-dd')) || []
+    allBookings.map((b) => format(new Date(b.moveInData), 'yyyy-MM-dd')) || []
 
   // Mutation for status update
   const statusMutation = useMutation({
@@ -48,10 +69,13 @@ export default function SiteVisitCalendarPage() {
       setPendingBookingId(variables.bookingId)
     },
     onSuccess: (_, variables) => {
-      const action = variables.status === 'approved' ? 'approved' : 'declined'
+      const action = variables.status === 'approved' ? 'approved' : variables.status === 'pending' ? 'reverted to pending' : 'declined'
       toast.success(`Booking ${action} successfully`)
       queryClient.invalidateQueries({
         queryKey: calendarKeys.bookings('pending'),
+      })
+      queryClient.invalidateQueries({
+        queryKey: calendarKeys.bookings('approved'),
       })
     },
     onError: () => {
@@ -71,20 +95,24 @@ export default function SiteVisitCalendarPage() {
     statusMutation.mutate({ bookingId, status: 'cancelled' })
   }
 
+  const handleRevert = (bookingId: string) => {
+    statusMutation.mutate({ bookingId, status: 'pending' })
+  }
+
   // Filter bookings based on selected date
-  // If no date is selected or filtered list is empty, show all pending
+  // If no date is selected or filtered list is empty, show all relevant bookings
   const filteredBookings = selectedDate
-    ? data?.data.filter(
+    ? allBookings.filter(
       (b) =>
         format(new Date(b.moveInData), 'yyyy-MM-dd') ===
         format(selectedDate, 'yyyy-MM-dd')
     ) || []
-    : data?.data || []
+    : allBookings || []
 
   const displayBookings =
     selectedDate && filteredBookings.length > 0
       ? filteredBookings
-      : data?.data || []
+      : allBookings || []
 
   return (
     <div className="min-h-screen">
@@ -110,6 +138,11 @@ export default function SiteVisitCalendarPage() {
           pendingBookingId={pendingBookingId}
           onApprove={handleApprove}
           onDecline={handleDecline}
+          onRevert={handleRevert}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>

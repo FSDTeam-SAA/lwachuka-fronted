@@ -117,14 +117,14 @@ export function Navbar() {
         </Link>
       </div>
     ) : (
-      <div className="flex gap-3">
-        <Link href="/login">
-          <Button variant="outline" size="sm" className="text-[#101828] text-base font-bold border-none bg-transparent shadow-none">
+      <div className="flex items-center gap-3">
+        <Link href="/login" className="flex items-center">
+          <Button variant="outline" size="sm" className="text-[#101828] text-base font-bold border-none bg-transparent shadow-none h-[40px] flex items-center justify-center">
             Log in
           </Button>
         </Link>
-        <Link href="/register">
-          <Button size="sm" className="bg-[#061F3D] text-white px-[21px] h-[40px] rounded-full text-base font-bold hover:bg-[#061F3D]/90">
+        <Link href="/register" className="flex items-center">
+          <Button size="sm" className="bg-[#061F3D] text-white px-[21px] h-[40px] rounded-full text-base font-bold hover:bg-[#061F3D]/90 flex items-center justify-center">
             Sign up
           </Button>
         </Link>
@@ -148,8 +148,8 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`inline-flex h-[40px] items-center rounded-full px-4 text-base font-semibold transition-colors ${isActive(link.href)
-                    ? 'bg-[#061F3D] text-white hover:text-white'
-                    : 'text-[#1E1E1E] hover:text-primary'
+                  ? 'bg-[#061F3D] text-white hover:text-white'
+                  : 'text-[#1E1E1E] hover:text-primary'
                   }`}
               >
                 {link.label}
@@ -158,7 +158,7 @@ export function Navbar() {
           </div>
 
           {/* Desktop Auth */}
-          <div className="hidden md:flex">
+          <div className="hidden md:flex items-center">
             <AuthSection />
           </div>
 
