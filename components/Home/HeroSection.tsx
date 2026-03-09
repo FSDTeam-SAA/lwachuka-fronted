@@ -1,17 +1,22 @@
-'use client';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client'
 
-import Image from 'next/image';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import Image from 'next/image'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export function HeroSection() {
-  const thumbs = ['/house.png', '/galary.png', '/galary2.png', '/galary3.png'];
-  const pages = thumbs.map((_, idx) => idx + 1);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const thumbs = ['/house.png', '/galary.png', '/galary2.png', '/galary3.png']
+  const pages = thumbs.map((_, idx) => idx + 1)
+  const [activeIndex, setActiveIndex] = useState(0)
 
-  const avatars = ['/avater2.png', '/avater2.png', '/avater3.png', '/avater4.png'];
-
+  const avatars = [
+    '/avater2.png',
+    '/avater2.png',
+    '/avater3.png',
+    '/avater4.png',
+  ]
 
   return (
     <section className="bg-white">
@@ -35,16 +40,17 @@ export function HeroSection() {
             </h1>
 
             <p className="mt-5 text-base leading-6 text-[#7D7D7D] sm:text-base">
-              From cozy apartments to luxury villas, discover hand-picked listings tailored to your
-              lifestyle, schedule visits with ease, and make secure payments—everything designed to
-              bring you closer to your perfect place.
+              From cozy apartments to luxury villas, discover hand-picked
+              listings tailored to your lifestyle, schedule visits with ease,
+              and make secure payments—everything designed to bring you closer
+              to your perfect place.
             </p>
 
             <div className="mt-7">
               <Link href="/properties">
-              <Button className="h-11 rounded-full bg-[#061F3D] px-6 text-white shadow-sm hover:bg-[#061F3D]/90">
-                Start Exploring Properties <span className="ml-2">→</span>
-              </Button>
+                <Button className="h-11 rounded-full bg-[#061F3D] px-6 text-white shadow-sm hover:bg-[#061F3D]/90">
+                  Start Exploring Properties <span className="ml-2">→</span>
+                </Button>
               </Link>
             </div>
 
@@ -103,7 +109,9 @@ export function HeroSection() {
                     <div
                       className={[
                         'pointer-events-none absolute inset-0 ring-2 ring-blue-500 transition',
-                        activeIndex === idx ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                        activeIndex === idx
+                          ? 'opacity-100'
+                          : 'opacity-0 group-hover:opacity-100',
                       ].join(' ')}
                     />
                   </button>
@@ -113,8 +121,8 @@ export function HeroSection() {
               {/* Pagination */}
               <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
                 <div className="flex items-center justify-between gap-2">
-                  {pages.map((p) => {
-                    const isActive = p - 1 === activeIndex;
+                  {pages.map(p => {
+                    const isActive = p - 1 === activeIndex
                     return (
                       <button
                         key={p}
@@ -129,7 +137,7 @@ export function HeroSection() {
                       >
                         {p}
                       </button>
-                    );
+                    )
                   })}
                 </div>
               </div>
@@ -141,5 +149,5 @@ export function HeroSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }
