@@ -9,6 +9,7 @@ import { SubscriptionCard } from '@/components/promotions/SubscriptionCard'
 import { SubscriptionCardSkeleton } from '@/components/promotions/SubscriptionCardSkeleton'
 import { MpesaPaymentModal } from '@/components/promotions/MpesaPaymentModal'
 
+import { PromotionStats } from '@/components/promotions/PromotionStats'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 
 export default function PromotionsPage() {
@@ -48,6 +49,7 @@ export default function PromotionsPage() {
       />
 
       <div className="p-8 max-w-full mx-auto">
+        <PromotionStats />
 
         <div className="space-y-12">
           {/* Section Title */}
