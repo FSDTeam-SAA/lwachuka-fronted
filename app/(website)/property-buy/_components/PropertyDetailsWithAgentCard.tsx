@@ -12,6 +12,7 @@ type AgentLike = {
   profileImage?: string;
   expertise?: string;
   serviceArea?: string;
+  location?: string;
   approvedPropertyCount?: number;
   experience?: string;
   phoneNumber?: string;
@@ -41,9 +42,16 @@ const formatDate = (value?: string) => {
 /* ---------------- COMPONENT ---------------- */
 
 export function PropertyDetailsWithAgentCard({ property }: { property: Property }) {
-  const rawAgent = Array.isArray(property.listingUser)
-    ? (property.listingUser[0] as AgentLike | undefined)
+  const createByAgent =
+    property.createBy && typeof property.createBy === "object"
+      ? (property.createBy as AgentLike)
+      : undefined;
+  const listingUserAgent = Array.isArray(property.listingUser)
+    ? (property.listingUser.find((entry) => entry && typeof entry === "object") as
+        | AgentLike
+        | undefined)
     : undefined;
+  const rawAgent = createByAgent ?? listingUserAgent;
 
   const agentName =
     [rawAgent?.firstName, rawAgent?.lastName].filter(Boolean).join(" ") ||
@@ -52,7 +60,10 @@ export function PropertyDetailsWithAgentCard({ property }: { property: Property 
   const agentExpertise =
     rawAgent?.expertise || "Residential Sales, Residential Leasing";
   const agentServiceArea =
-    rawAgent?.serviceArea || property.location?.split(",").pop()?.trim() || "Kenya";
+    rawAgent?.serviceArea ||
+    property.location?.split(",").pop()?.trim() ||
+    rawAgent?.location ||
+    "Kenya";
   const agentProperties =
     rawAgent?.approvedPropertyCount != null
       ? `${rawAgent.approvedPropertyCount} For Sale`

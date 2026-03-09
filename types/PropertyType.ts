@@ -35,12 +35,28 @@ export interface Property {
   handoverDate?: string;
   lat?: number;
   lng?: number;
-  createBy?: string;
-  listingUser?: Array<Record<string, unknown>>;
+  createBy?: string | PropertyAgent;
+  listingUser?: Array<PropertyAgent | string>;
   bookmarkUser?: Array<string | { _id?: string }>;
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
+}
+
+export interface PropertyAgent {
+  _id?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+  location?: string;
+  phoneNumber?: string;
+  profileImage?: string;
+  expertise?: string;
+  serviceArea?: string;
+  approvedPropertyCount?: number;
+  experience?: string;
+  [key: string]: unknown;
 }
 
 export interface PropertyApiResponse {
