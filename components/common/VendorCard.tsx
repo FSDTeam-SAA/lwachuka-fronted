@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import { Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface VendorCardProps {
   id: string;
@@ -11,6 +14,7 @@ interface VendorCardProps {
   listings: number;
   role?: "agent" | "vendor";
   advertisementCount?: number;
+  phoneNumber?: string;
 }
 
 export default function VendorCard({
@@ -21,7 +25,27 @@ export default function VendorCard({
   image,
   listings,
   advertisementCount,
+  phoneNumber,
 }: VendorCardProps) {
+  const handleWhatsAppClick = () => {
+    const trimmed = phoneNumber?.trim() ?? "";
+
+    if (!trimmed) {
+      toast.error("Not available on WhatsApp");
+      return;
+    }
+
+    const normalized = trimmed.replace(/[^\d+]/g, "");
+    const numberForLink = normalized.replace(/^\+/, "");
+
+    if (!numberForLink) {
+      toast.error("Not available on WhatsApp");
+      return;
+    }
+
+    window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_rgba(15,23,42,0.08)] border border-[#F1F1F1]">
       {/* Image */}
@@ -71,7 +95,11 @@ export default function VendorCard({
         </div>
 
         {/* WhatsApp Button */}
-        <Button className="mt-8 w-full h-11 rounded-lg bg-[#061F3D] hover:bg-[#061F3D]/90 text-white">
+        <Button
+          type="button"
+          onClick={handleWhatsAppClick}
+          className="mt-8 w-full h-11 rounded-lg bg-[#061F3D] hover:bg-[#061F3D]/90 text-white"
+        >
           <span className="inline-flex items-center gap-2">
             <Image
               src="/WhatsApp.png"

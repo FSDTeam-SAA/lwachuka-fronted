@@ -12,6 +12,7 @@ interface Agent {
   email?: string;
   profileImage?: string;
   approvedPropertyCount?: number;
+  phoneNumber?: string;
 }
 
 interface ApiResponse {
@@ -98,6 +99,7 @@ export function AgentsSection() {
                   company={company}
                   image={image}
                   listings={agent.approvedPropertyCount ?? 0}
+                  phoneNumber={agent.phoneNumber}
                 />
               );
             })}

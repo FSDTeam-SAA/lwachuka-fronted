@@ -1,29 +1,183 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Sliders } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useQuery } from '@tanstack/react-query';
+import type { PropertyApiResponse } from '@/types/PropertyType';
 
-export function SearchFilter() {
-  const [activeType, setActiveType] = useState('All');
+async function fetchPropertyTypes(): Promise<string[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+  if (!baseUrl) {
+    throw new Error('Missing NEXT_PUBLIC_BACKEND_API_URL');
+  }
 
-  const types = ['All', 'House', 'Residential', 'Apartment'];
+  const res = await fetch(`${baseUrl}/property/?status=approved`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch property types');
+  }
+
+  const json: PropertyApiResponse = await res.json();
+  const deduped = new Map<string, string>();
+
+  for (const item of json.data ?? []) {
+    const raw = (item.propertyType || '').toString().trim();
+    if (!raw) continue;
+    const key = raw.toLowerCase();
+    if (!deduped.has(key)) {
+      deduped.set(key, raw);
+    }
+  }
+
+  return Array.from(deduped.values()).sort((a, b) => a.localeCompare(b));
+}
+
+type SearchFilterValues = {
+  transaction?: 'buy' | 'sell' | 'rent' | 'Buy' | 'Sell' | 'Rent' | string;
+  listingType?: string;
+  propertyType?: string;
+  type?: string;
+  location?: string;
+  price?: string;
+};
+
+type SearchFilterProps = {
+  initialValues?: SearchFilterValues;
+  submitPath?: string;
+  autoSubmitOnListingTypeChange?: boolean;
+};
+
+export function SearchFilter({
+  initialValues,
+  submitPath,
+  autoSubmitOnListingTypeChange,
+}: SearchFilterProps) {
+  const router = useRouter();
+  const [listingType, setListingType] = useState<'Sell' | 'Rent'>('Sell');
+  const [propertyType, setPropertyType] = useState('All');
+  const [lookingFor, setLookingFor] = useState('');
+  const [location, setLocation] = useState('');
+  const [price, setPrice] = useState('');
+  const [hasUserSelectedType, setHasUserSelectedType] = useState(false);
+
+  const initialListingType = (initialValues?.listingType ?? '').toString();
+  const initialTransaction = (initialValues?.transaction ?? '').toString();
+  const initialType = (initialValues?.type ?? '').toString();
+  const initialLocation = (initialValues?.location ?? '').toString();
+  const initialPrice = (initialValues?.price ?? '').toString();
+  const initialPropertyType = (initialValues?.propertyType ?? '').toString();
+
+  const {
+    data: propertyTypesData,
+    isLoading: isPropertyTypesLoading,
+    error: propertyTypesError,
+  } = useQuery({
+    queryKey: ['property-types'],
+    queryFn: fetchPropertyTypes,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  const types = useMemo(
+    () => ['All', ...(propertyTypesData ?? [])],
+    [propertyTypesData]
+  );
+
+  useEffect(() => {
+    if (!initialListingType && !initialTransaction && !initialType && !initialLocation && !initialPrice) {
+      return;
+    }
+
+    const normalizedListing =
+      initialListingType.toLowerCase() === 'for rent' ||
+      initialTransaction.toLowerCase() === 'rent'
+        ? 'Rent'
+        : 'Sell';
+
+    setListingType(normalizedListing);
+    setLookingFor(initialType);
+    setLocation(initialLocation);
+    setPrice(initialPrice);
+  }, [
+    initialListingType,
+    initialTransaction,
+    initialType,
+    initialLocation,
+    initialPrice,
+  ]);
+
+  useEffect(() => {
+    if (hasUserSelectedType) return;
+
+    const matchedType =
+      types.find(
+        (type) => type.toLowerCase() === initialPropertyType.toLowerCase()
+      ) ?? 'All';
+
+    setPropertyType(matchedType);
+  }, [initialPropertyType, types, hasUserSelectedType]);
+
+  const handleFindProperties = (overrides?: {
+    listingType?: 'Sell' | 'Rent';
+    propertyType?: string;
+    lookingFor?: string;
+    location?: string;
+    price?: string;
+  }) => {
+    const selectedListingType = overrides?.listingType ?? listingType;
+    const selectedPropertyType = overrides?.propertyType ?? propertyType;
+    const selectedLookingFor = overrides?.lookingFor ?? lookingFor;
+    const selectedLocation = overrides?.location ?? location;
+    const selectedPrice = overrides?.price ?? price;
+
+    const params = new URLSearchParams();
+
+    const looking = selectedLookingFor.trim();
+    const place = selectedLocation.trim();
+    const priceValue = selectedPrice.trim();
+
+    if (looking) params.set('type', looking);
+    if (place) params.set('location', place);
+    if (priceValue) params.set('price', priceValue);
+
+    params.set(
+      'listingType',
+      selectedListingType === 'Rent' ? 'For Rent' : 'For Sale'
+    );
+    if (selectedPropertyType !== 'All') {
+      params.set('propertyType', selectedPropertyType);
+    }
+
+    const query = params.toString();
+    const targetPath = submitPath || '/serach-result';
+    router.push(`${targetPath}${query ? `?${query}` : ''}`);
+  };
 
   return (
-    <section className="">
+    <section>
       <div className="mx-auto container px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-border bg-white p-6 shadow-sm md:p-8">
-          <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-[#E5E5E5] bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)] md:p-8">
+          <div className="grid gap-6 md:grid-cols-3">
             {/* Looking For */}
             <div>
-              <label className="block text-xl font-semibold text-[#1E1E1E]">
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
                 Looking For
               </label>
               <div className="relative mt-2">
                 <Input
                   placeholder="Enter Type"
-                  className="pl-10 h-[40px] bg-[#F7F7F7] border-[#CECECE] placeholder:text-[#7D7D7D]"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white pl-10 placeholder:text-[#7D7D7D]"
+                  value={lookingFor}
+                  onChange={(event) => setLookingFor(event.target.value)}
                 />
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
@@ -31,13 +185,15 @@ export function SearchFilter() {
 
             {/* Location */}
             <div>
-              <label className="bblock text-xl font-semibold text-[#1E1E1E]">
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
                 Location
               </label>
               <div className="relative mt-2">
                 <Input
                   placeholder="Location"
-                  className="pl-10 h-[40px] bg-[#F7F7F7] border-[#CECECE] placeholder:text-[#7D7D7D]"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white pl-10 placeholder:text-[#7D7D7D]"
+                  value={location}
+                  onChange={(event) => setLocation(event.target.value)}
                 />
                 <svg
                   className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -63,13 +219,15 @@ export function SearchFilter() {
 
             {/* Price */}
             <div>
-              <label className="block text-xl font-semibold text-[#1E1E1E]">
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
                 Price
               </label>
               <div className="relative mt-2">
                 <Input
                   placeholder="Price"
-                  className="pl-10 h-[40px] bg-[#F7F7F7] border-[#CECECE] placeholder:text-[#7D7D7D]"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white pl-10 placeholder:text-[#7D7D7D]"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
                 />
                 <svg
                   className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -89,22 +247,46 @@ export function SearchFilter() {
           </div>
 
           {/* Filter Row */}
-          <div className="mt-6 flex flex-col items-center justify-between gap-4 md:flex-row">
-            {/* Buy/Sell Buttons */}
-            <div className="flex gap-2">
+          <div className="mt-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            {/* Left Controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Sell/Rent Buttons */}
               <Button
-                variant={activeType === 'Buy' ? 'default' : 'outline'}
+                variant={listingType === 'Sell' ? 'default' : 'outline'}
                 size="sm"
-                className={activeType === 'Buy' ? 'bg-primary' : ''}
-              >
-                Buy
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
+                onClick={() => {
+                  setListingType('Sell');
+                  if (autoSubmitOnListingTypeChange) {
+                    handleFindProperties({ listingType: 'Sell' });
+                  }
+                }}
+                className={
+                  listingType === 'Sell'
+                    ? 'rounded-full bg-[#0B1B3B] px-6 text-white hover:bg-[#0B1B3B]/90'
+                    : 'rounded-full border-[#E3E3E3] px-6 text-[#5E5E5E]'
+                }
               >
                 Sell
               </Button>
+              <Button
+                variant={listingType === 'Rent' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setListingType('Rent');
+                  if (autoSubmitOnListingTypeChange) {
+                    handleFindProperties({ listingType: 'Rent' });
+                  }
+                }}
+                className={
+                  listingType === 'Rent'
+                    ? 'rounded-full bg-[#0B1B3B] px-6 text-white hover:bg-[#0B1B3B]/90'
+                    : 'rounded-full border-[#E3E3E3] px-6 text-[#5E5E5E]'
+                }
+              >
+                Rent
+              </Button>
+
+            
             </div>
 
             {/* Property Type Tags */}
@@ -112,22 +294,38 @@ export function SearchFilter() {
               {types.map((type) => (
                 <Button
                   key={type}
-                  variant={activeType === type ? 'default' : 'outline'}
+                  variant={propertyType === type ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setActiveType(type)}
-                  className={activeType === type ? 'bg-primary' : ''}
+                  onClick={() => {
+                    setHasUserSelectedType(true);
+                    setPropertyType(type);
+                  }}
+                  className={
+                    propertyType === type
+                      ? 'rounded-full bg-[#0B1B3B] px-5 text-white hover:bg-[#0B1B3B]/90'
+                      : 'rounded-full border-[#E3E3E3] px-5 text-[#5E5E5E]'
+                  }
                 >
                   {type}
                 </Button>
               ))}
-              <Button variant="ghost" size="sm">
-                <Sliders className="h-4 w-4" />
-                Filter
-              </Button>
+              {isPropertyTypesLoading && types.length === 1 ? (
+                <span className="self-center text-sm text-[#7D7D7D]">
+                  Loading types...
+                </span>
+              ) : null}
+              {propertyTypesError ? (
+                <span className="self-center text-sm text-red-600">
+                  Failed to load property types.
+                </span>
+              ) : null}
             </div>
 
             {/* Find Properties Button */}
-            <Button className="bg-primary hover:bg-primary/90 w-full md:w-auto">
+            <Button
+              onClick={() => handleFindProperties()}
+              className="w-full rounded-full bg-[#0B1B3B] px-6 text-white hover:bg-[#0B1B3B]/90 md:w-auto"
+            >
               <Search className="mr-2 h-4 w-4" />
               Find Properties
             </Button>
