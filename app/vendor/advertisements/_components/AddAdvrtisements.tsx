@@ -137,7 +137,7 @@ export default function AddAdvrtisements() {
       data.media.forEach((file) => formData.append("uploadMedia", file));
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/advertisement`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/advertisement`,
         {
           method: "POST",
           headers: {

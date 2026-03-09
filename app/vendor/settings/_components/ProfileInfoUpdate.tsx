@@ -35,7 +35,7 @@ export default function ProfileInfoUpdate() {
     enabled: !!userId,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/${userId}`,
       );
       if (!res.ok) throw new Error("Failed to fetch user");
       return res.json();
@@ -85,7 +85,7 @@ export default function ProfileInfoUpdate() {
   const updateUserMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" , Authorization: `Bearer ${TOKEN}`,},
@@ -116,7 +116,7 @@ export default function ProfileInfoUpdate() {
       const formData = new FormData();
       formData.append("profileImage", file);
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`,
         {
           method: "PUT",
           headers: {

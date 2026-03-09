@@ -17,7 +17,7 @@ function BillingPaymentsCard() {
     enabled: !!TOKEN,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`,
         {
           method: "GET",
           headers: {
@@ -36,7 +36,7 @@ function BillingPaymentsCard() {
     queryKey: ["payment", TOKEN],
     enabled: !!TOKEN,
     queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment/my`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/payment/my`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${TOKEN}`,

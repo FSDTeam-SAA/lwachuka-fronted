@@ -28,9 +28,8 @@ function PasswordInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`h-11 rounded-lg pr-10 text-sm ${
-          hasError ? "border-red-400 focus-visible:ring-red-300" : "border-gray-200"
-        }`}
+        className={`h-11 rounded-lg pr-10 text-sm ${hasError ? "border-red-400 focus-visible:ring-red-300" : "border-gray-200"
+          }`}
       />
       <button
         type="button"
@@ -76,7 +75,7 @@ export default function ChangePassword() {
       const formData = new FormData()
       formData.append("profileImage", file)
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/${userId}/profile-image`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/profile`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${TOKEN}` },

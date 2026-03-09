@@ -45,7 +45,7 @@ function BillingPaymentsPlan() {
     enabled: !!TOKEN,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscriber`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/subscriber`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${TOKEN}` },
@@ -96,7 +96,7 @@ function BillingPaymentsPlan() {
       };
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/mpesa/callback`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/mpesa/callback`,
         {
           method: "POST",
           headers: {
@@ -124,7 +124,7 @@ function BillingPaymentsPlan() {
   const payNumberMutation = useMutation({
     mutationFn: async (): Promise<StkPushResponse> => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscriber/pad-listing-mpesa/${selectedPlan?._id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/subscriber/pad-listing-mpesa/${selectedPlan?._id}`,
         {
           method: "POST",
           headers: {

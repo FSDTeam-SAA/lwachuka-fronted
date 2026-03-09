@@ -53,23 +53,33 @@ export function Footer() {
             <h4 className="text-xl font-semibold text-[#FFFFFF]">Quick Links</h4>
             <ul className="mt-4 space-y-3 text-sm text-white/70">
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/" className="hover:text-white transition">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/properties" className="hover:text-white transition">
                   Buy Properties
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/properties" className="hover:text-white transition">
                   Rent Properties
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/agent&vendor" className="hover:text-white transition">
                   Agents &amp; Vendors
+                </Link>
+              </li>
+              <li>
+                <Link href="/about-us" className="hover:text-white transition">
+                  About us
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact-us" className="hover:text-white transition">
+                  Contact us
                 </Link>
               </li>
             </ul>
@@ -80,17 +90,17 @@ export function Footer() {
             <h4 className="text-xl font-semibold text-[#FFFFFF]">Account</h4>
             <ul className="mt-4 space-y-3 text-sm text-white/70">
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/login" className="hover:text-white transition">
                   Login
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/register" className="hover:text-white transition">
                   Register
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white transition">
+                <Link href="/user/dashboard/saved-properties" className="hover:text-white transition">
                   My Favorites
                 </Link>
               </li>

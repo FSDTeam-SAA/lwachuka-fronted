@@ -55,7 +55,9 @@ export function Navbar() {
   const dashboardHref =
     user?.role === 'agent' || user?.role === 'owners'
       ? '/agent/dashboard'
-      : '/user/dashboard';
+      : user?.role === 'vendor'
+        ? '/vendor/dashboard'
+        : '/user/dashboard';
 
   const AuthSection = ({ mobile = false }: { mobile?: boolean }) => {
     if (status === 'loading') return null;
@@ -88,7 +90,16 @@ export function Navbar() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/agent/settings" className="cursor-pointer">
+              <Link
+                href={
+                  user?.role === 'agent' || user?.role === 'owners'
+                    ? '/agent/settings'
+                    : user?.role === 'vendor'
+                      ? '/vendor/settings'
+                      : '/user/dashboard/settings'
+                }
+                className="cursor-pointer"
+              >
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Link>
