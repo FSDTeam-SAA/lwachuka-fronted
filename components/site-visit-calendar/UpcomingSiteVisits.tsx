@@ -4,6 +4,7 @@ import { Booking, BookingStatus } from "@/types/calendar";
 import { BookingCard } from "./BookingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { Pagination } from "@/components/shared/Pagination";
 
 interface UpcomingSiteVisitsProps {
     bookings: Booking[];
@@ -12,6 +13,11 @@ interface UpcomingSiteVisitsProps {
     pendingBookingId: string | null;
     onApprove: (id: string, currentStatus: BookingStatus) => void;
     onDecline: (id: string, currentStatus: BookingStatus) => void;
+    onRevert?: (id: string, newStatus: BookingStatus) => void;
+    currentPage?: number;
+    totalPages?: number;
+    totalItems?: number;
+    onPageChange?: (page: number) => void;
 }
 
 export function UpcomingSiteVisits({
@@ -21,7 +27,17 @@ export function UpcomingSiteVisits({
     pendingBookingId,
     onApprove,
     onDecline,
+    onRevert,
+    currentPage = 1,
+    totalPages = 0,
+    totalItems = 0,
+    onPageChange,
 }: UpcomingSiteVisitsProps) {
+
+    // Filter out duplicates based on _id, since user reported repeating cards
+    const uniqueBookings = bookings.filter((booking, index, self) =>
+        index === self.findIndex((t) => t._id === booking._id)
+    );
 
     if (isLoading) {
         return (
@@ -53,7 +69,7 @@ export function UpcomingSiteVisits({
         <div className="mt-8">
             <h2 className="text-xl font-bold text-[#0D1B2A] mb-6">Upcoming Site Visits</h2>
 
-            {bookings.length === 0 ? (
+            {uniqueBookings.length === 0 ? (
                 <div className="bg-white rounded-xl border border-gray-100 p-12 text-center flex flex-col items-center">
                     <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-400">
                         <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,16 +88,28 @@ export function UpcomingSiteVisits({
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {bookings.map((booking) => (
-                        <BookingCard
-                            key={booking._id}
-                            booking={booking}
-                            isPending={pendingBookingId === booking._id}
-                            onApprove={onApprove}
-                            onDecline={onDecline}
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {uniqueBookings.map((booking) => (
+                            <BookingCard
+                                key={booking._id}
+                                booking={booking}
+                                isPending={pendingBookingId === booking._id}
+                                onApprove={onApprove}
+                                onDecline={onDecline}
+                                onRevert={onRevert}
+                            />
+                        ))}
+                    </div>
+                    {onPageChange && totalItems > 0 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            onPageChange={onPageChange}
+                            itemsPerPage={4}
                         />
-                    ))}
+                    )}
                 </div>
             )}
         </div>

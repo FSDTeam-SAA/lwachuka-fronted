@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { getMyPayments, paymentKeys } from '@/lib/queries/payments'
+import { getMyPayments, getAllMyPayments, paymentKeys } from '@/lib/queries/payments'
 import { PaymentTable } from '@/components/payment-history/PaymentTable'
 import { PaymentStatCards } from '@/components/payment-history/PaymentStatCards'
 import { Pagination } from '@/components/shared/Pagination'
@@ -21,18 +21,25 @@ export default function PaymentHistoryPage() {
     enabled: !!token,
   })
 
-  // Calculate stats from the current page's data
-  // TODO: Replace with dedicated stats API endpoint when available from backend
-  const payments = data?.data || []
+  // query for all payments to calculate global stats
+  const { data: allData, isLoading: isStatsLoading } = useQuery({
+    queryKey: paymentKeys.stats(),
+    queryFn: () => getAllMyPayments(token),
+    enabled: !!token,
+  })
 
-  const totalSpent = payments
+  const payments = data?.data || []
+  const allPayments = allData?.data || []
+
+  // Calculate stats from the full data set instead of paginated data
+  const totalSpent = allPayments
     .filter((p) => p.status === 'completed')
     .reduce((sum, p) => sum + p.amount, 0)
 
-  const completedPayments = payments.filter(
+  const completedPayments = allPayments.filter(
     (p) => p.status === 'completed'
   ).length
-  const pendingPayments = payments.filter((p) => p.status === 'pending').length
+  const pendingPayments = allPayments.filter((p) => p.status === 'pending').length
 
   const totalPages = Math.ceil((data?.meta.total ?? 0) / 10)
   const totalItems = data?.meta.total ?? 0
@@ -51,7 +58,7 @@ export default function PaymentHistoryPage() {
           totalSpent={totalSpent}
           completedPayments={completedPayments}
           pendingPayments={pendingPayments}
-          isLoading={isLoading}
+          isLoading={isStatsLoading}
         />
 
         {/* Table Component */}

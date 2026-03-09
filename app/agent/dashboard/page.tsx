@@ -1,16 +1,17 @@
 'use client'
 
+import { useState } from 'react'
 import {
   Building2,
   Eye,
   CalendarDays,
   List,
   PlusCircle,
-  Calendar,
-  // TrendingUp,
+  Calendar as CalendarIcon,
   ChevronRight,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useQuery } from '@tanstack/react-query'
@@ -18,55 +19,44 @@ import { dashboardKeys, getAgentOverview } from '@/lib/queries/dashboard'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { cn } from '@/lib/utils'
 import {
-  // LineChart,
-  // Line,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Area,
-  AreaChart,
 } from 'recharts'
-
-const dummyChartData = [
-  { name: 'JAN', value: 10 },
-  { name: 'FEB', value: 13 },
-  { name: 'MAR', value: 16 },
-  { name: 'APR', value: 13 },
-  { name: 'MAY', value: 10 },
-  { name: 'JUN', value: 8 },
-  { name: 'JUL', value: 5 },
-  { name: 'AUG', value: 10 },
-  { name: 'SEP', value: 20 },
-]
 
 export default function AgentDashboard() {
   const { data: session } = useSession()
   const token = session?.user?.accessToken
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
-  const { data: overviewData, isLoading } = useQuery({
-    queryKey: dashboardKeys.overview(),
-    queryFn: () => getAgentOverview(token),
+  const { data, isLoading } = useQuery({
+    queryKey: dashboardKeys.overview(selectedYear),
+    queryFn: () => getAgentOverview(selectedYear, token),
     enabled: !!token,
   })
+
+  const overview = data?.data
 
   const stats = [
     {
       title: 'Total Property Listings',
-      value: overviewData?.data?.totalProperty || 0,
+      value: overview?.totalProperty || 0,
       subtitle: 'All properties in your portfolio',
       icon: Building2,
     },
     {
       title: 'Active Listings',
-      value: overviewData?.data?.activeProperty || 0,
+      value: overview?.activeProperty || 0,
       subtitle: 'Currently visible to buyers',
       icon: Eye,
     },
     {
       title: 'Upcoming Site Visits',
-      value: overviewData?.data?.upCommingSiteViste || 0,
+      value: overview?.upCommingSiteViste || 0,
       subtitle: 'Scheduled for this week',
       icon: CalendarDays,
     },
@@ -87,7 +77,7 @@ export default function AgentDashboard() {
     },
     {
       label: 'View Site Visit Calendar',
-      icon: Calendar,
+      icon: CalendarIcon,
       href: '/agent/site-visit-calendar',
       bgColor: 'bg-purple-50',
     },
@@ -114,9 +104,13 @@ export default function AgentDashboard() {
                     <p className="text-[14px] font-medium text-gray-400 capitalize">
                       {card.title}
                     </p>
-                    <p className="text-4xl font-bold text-[#0D1B2A] mt-2 mb-1">
-                      {isLoading ? '...' : card.value}
-                    </p>
+                    {isLoading ? (
+                      <Skeleton className="h-9 w-16 mt-2 mb-1" />
+                    ) : (
+                      <p className="text-4xl font-bold text-[#0D1B2A] mt-2 mb-1">
+                        {card.value}
+                      </p>
+                    )}
                     <p className="text-[13px] text-gray-400 font-normal">
                       {card.subtitle}
                     </p>
@@ -141,60 +135,62 @@ export default function AgentDashboard() {
                 Monthly overview of your growth
               </p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-sm font-medium text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors">
-              2024 <Calendar className="h-4 w-4" />
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg text-sm font-medium text-gray-500 cursor-pointer border border-gray-200 transition-colors">
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                className="outline-none bg-transparent cursor-pointer font-semibold text-[#0D1B2A]"
+              >
+                {[2024, 2025, 2026, 2027].map(y => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+              <CalendarIcon className="h-4 w-4 ml-1" />
             </div>
           </div>
 
-          <div className="h-[350px] w-full mt-4">
+          <div className="h-[220px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dummyChartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0D1B2A" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#0D1B2A" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+              <LineChart
+                data={overview?.totalListingsByMonth ?? []}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#F0F0F0"
+                  strokeDasharray="4 4"
+                  stroke="#e5e7eb"
+                  vertical={true}
                 />
                 <XAxis
-                  dataKey="name"
+                  dataKey="month"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                  dy={10}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
                 />
                 <Tooltip
                   contentStyle={{
-                    borderRadius: '12px',
-                    border: 'none',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                   }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(value: any) => [value, 'Listings']}
                 />
-                <Area
+                <Line
                   type="monotone"
-                  dataKey="value"
+                  dataKey="total"
                   stroke="#0D1B2A"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorValue)"
-                  dot={{
-                    r: 4,
-                    fill: '#0D1B2A',
-                    strokeWidth: 2,
-                    stroke: '#fff',
-                  }}
-                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  strokeWidth={2}
+                  dot={{ fill: '#0D1B2A', r: 4, strokeWidth: 0 }}
+                  activeDot={{ r: 6 }}
                 />
-              </AreaChart>
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </Card>

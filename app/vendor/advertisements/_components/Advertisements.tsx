@@ -89,7 +89,7 @@ export default function AdvertisementManagement() {
 
       <div className="p-6">
         <div className="flex items-center justify-end mb-6">
-          <Link href="/advertisements/add-advertisement">
+          <Link href="/vendor/advertisements/add-advertisement">
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create New Ad
@@ -201,11 +201,10 @@ export default function AdvertisementManagement() {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(Number(page))}
-                    className={`h-8 w-8 flex items-center justify-center rounded-md text-sm font-medium transition-colors border ${
-                      currentPage === page
+                    className={`h-8 w-8 flex items-center justify-center rounded-md text-sm font-medium transition-colors border ${currentPage === page
                         ? "bg-[#1a2341] text-white border-[#1a2341]"
                         : "border-gray-200 text-gray-500 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>

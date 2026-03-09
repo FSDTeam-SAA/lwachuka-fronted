@@ -1,17 +1,14 @@
 import api from "../api";
-
-export interface DashboardOverviewData {
-    totalProperty: number;
-    activeProperty: number;
-    upCommingSiteViste: number;
-}
+import { DashboardOverviewResponse } from "@/types/dashboard";
 
 export const dashboardKeys = {
-    overview: () => ["dashboard", "overview"] as const,
+    all: ["dashboard"] as const,
+    overview: (year: number) => [...dashboardKeys.all, "overview", year] as const,
 };
 
-export const getAgentOverview = async (token?: string): Promise<{ data: DashboardOverviewData }> => {
+export const getAgentOverview = async (year: number, token?: string): Promise<DashboardOverviewResponse> => {
     const response = await api.get("/dashboard/agent-overview", {
+        params: { year },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return response.data;

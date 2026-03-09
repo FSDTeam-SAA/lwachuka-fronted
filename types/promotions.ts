@@ -33,3 +33,17 @@ export interface MpesaPaymentResponse {
         message: string;
     };
 }
+
+export interface MpesaCallbackPayload {
+    Body: {
+        stkCallback: {
+            MerchantRequestID: string;
+            CheckoutRequestID: string;
+            ResultCode: number;
+            ResultDesc: string;
+            CallbackMetadata: {
+                Item: { Name: string; Value: string | number }[];
+            };
+        };
+    };
+}

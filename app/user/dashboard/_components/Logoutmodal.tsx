@@ -11,13 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { LogOut } from "lucide-react";
 
+import { signOut } from "next-auth/react";
+
 export function LogoutModal() {
-  const handleLogout = () => {
-    // 👉 এখানে তোমার logout logic দাও
-    // example:
-    // localStorage.removeItem("token")
-    // router.push("/login")
-    console.log("User logged out");
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
