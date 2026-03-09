@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
       if (role === 'agent' || role === 'owners') {
         return NextResponse.redirect(new URL('/agent/dashboard', req.url))
       } else if (role === 'vendor') {
-        return NextResponse.redirect(new URL('/vendor/dashboard', req.url))
+        return NextResponse.redirect(new URL('/vendor/advertisements', req.url))
       }
       return NextResponse.redirect(new URL('/user/dashboard', req.url))
     }

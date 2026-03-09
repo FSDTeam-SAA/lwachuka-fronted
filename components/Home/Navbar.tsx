@@ -56,7 +56,7 @@ export function Navbar() {
     user?.role === 'agent' || user?.role === 'owners'
       ? '/agent/dashboard'
       : user?.role === 'vendor'
-        ? '/vendor/dashboard'
+        ? '/vendor/advertisements'
         : '/user/dashboard';
 
   const AuthSection = ({ mobile = false }: { mobile?: boolean }) => {
