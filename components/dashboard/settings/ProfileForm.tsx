@@ -187,32 +187,18 @@ export function ProfileForm({ userId }: ProfileFormProps) {
                 </div>
             </div>
 
-            {/* Email + Password */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1.5 block">
-                        Email Address
-                    </Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        value={val("email")}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                        placeholder="sarah@example.com"
-                    />
-                </div>
-                <div>
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1.5 block">
-                        Password (Optional)
-                    </Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        value={val("password")}
-                        onChange={(e) => handleChange("password", e.target.value)}
-                        placeholder="Enter to change password"
-                    />
-                </div>
+            {/* Email */}
+            <div className="mb-4">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1.5 block">
+                    Email Address
+                </Label>
+                <Input
+                    id="email"
+                    type="email"
+                    value={val("email")}
+                    readOnly
+                    className="bg-gray-50 text-gray-500 cursor-not-allowed focus-visible:ring-0 focus-visible:border-gray-200"
+                />
             </div>
 
             {/* Phone + Role */}
@@ -235,8 +221,8 @@ export function ProfileForm({ userId }: ProfileFormProps) {
                     <Input
                         id="role"
                         value={val("role")}
-                        onChange={(e) => handleChange("role", e.target.value)}
-                        placeholder="user, agent..."
+                        readOnly
+                        className="bg-gray-50 text-gray-500 cursor-not-allowed focus-visible:ring-0 focus-visible:border-gray-200 capitalize"
                     />
                 </div>
             </div>

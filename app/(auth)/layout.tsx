@@ -22,7 +22,7 @@ export default function AuthLayout({
 
             {/* Right side - Form Container */}
             <div className="flex items-center justify-center p-6 lg:p-10">
-                <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                <div className="w-full max-w-xl bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
                     {children}
                 </div>
             </div>

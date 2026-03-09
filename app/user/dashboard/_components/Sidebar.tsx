@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Menu, X,  CreditCard, Settings, Heart, Calendar } from "lucide-react";
+import { LayoutDashboard, Menu, X, CreditCard, Settings, Heart, Calendar } from "lucide-react";
 
 import { useState } from "react";
 import Image from "next/image";
 import { LogoutModal } from "./Logoutmodal";
 
 const navigation = [
-    { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
   { name: "Saved Properties", href: "/user/dashboard/saved-properties", icon: Heart },
   { name: "Inquiry History", href: "/user/dashboard/inquiry-history", icon: CreditCard },
   { name: "Site Visit Calendar", href: "/user/dashboard/site-visit-calendar", icon: Calendar },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Settings", href: "/user/dashboard/settings", icon: Settings },
 
 ];
 
