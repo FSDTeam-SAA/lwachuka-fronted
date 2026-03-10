@@ -42,7 +42,7 @@ export function WhyChoosePlatform() {
             return (
               <div
                 key={idx}
-                className="rounded-2xl border border-[#EDEDED] bg-white px-7 py-8 shadow-[0_10px_30px_rgba(15,23,42,0.06)]"
+                className="rounded-2xl border border-[#EDEDED] bg-white px-7 py-8 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#D3920E]/40 hover:shadow-[0_16px_36px_rgba(15,23,42,0.12)]"
               >
                 {/* Icon box */}
                 <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[#EAF3EE]">

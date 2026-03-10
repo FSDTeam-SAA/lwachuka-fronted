@@ -203,11 +203,11 @@ export function GetInTouchSection() {
                     className="text-[11px] leading-5 text-[#8A8A8A]"
                   >
                     You agree to our{' '}
-                    <Link href="#" className="text-[#0B1C39] underline">
+                    <Link href="/terms" className="text-[#0B1C39] underline">
                       Terms & Conditions
                     </Link>{' '}
                     and{' '}
-                    <Link href="#" className="text-[#0B1C39] underline">
+                    <Link href="/privacy-policy" className="text-[#0B1C39] underline">
                       Privacy Policy
                     </Link>
                     .

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -13,12 +12,14 @@ type GalleryImage = {
 };
 
 interface PropertyImageGalleryProps {
-  images: string[];           // comes from API
-  title?: string;             // used for alt text
+  images: string[];
+  title?: string;
 }
 
-export function PropertyImageGallery({ images, title = "Property" }: PropertyImageGalleryProps) {
-  // Transform API image URLs into typed array
+export function PropertyImageGallery({
+  images,
+  title = "Property",
+}: PropertyImageGalleryProps) {
   const galleryImages: GalleryImage[] = images.map((src, index) => ({
     id: `${index + 1}`,
     src,
@@ -28,9 +29,10 @@ export function PropertyImageGallery({ images, title = "Property" }: PropertyIma
   const [active, setActive] = React.useState(0);
 
   const total = galleryImages.length;
+
   if (total === 0) {
     return (
-      <div className="w-full h-80 bg-gray-100 flex items-center justify-center rounded-2xl">
+      <div className="flex h-80 w-full items-center justify-center rounded-2xl bg-gray-100">
         <p className="text-gray-500">No images available</p>
       </div>
     );
@@ -41,61 +43,63 @@ export function PropertyImageGallery({ images, title = "Property" }: PropertyIma
   const next = () => setActive((p) => (p + 1) % total);
   const prev = () => setActive((p) => (p - 1 + total) % total);
 
-  // Thumbnails: show max 7 + "more" tile
   const thumbsToShow = 7;
   const visibleThumbs = galleryImages.slice(0, thumbsToShow);
   const remaining = Math.max(0, total - thumbsToShow);
 
   return (
     <section className="w-full">
-      <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Image */}
-        <div className="relative overflow-hidden rounded-2xl bg-[#F4F6F8] border border-[#EDEDED] shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-          <div className="relative h-[260px] sm:h-[380px] md:h-[480px] lg:h-[560px] xl:h-[620px]">
+        <div className="relative overflow-hidden rounded-2xl border border-[#EDEDED] bg-[#F4F6F8] shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <div className="relative h-[260px] sm:h-[380px] md:h-[480px] lg:h-[560px] xl:h-[550px]">
             <Image
               src={activeImg.src}
               alt={activeImg.alt}
-              width={1000}
-              height={1000}
+              fill
               priority
-              className="object-cover w-full h-full"
-            
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1200px"
+              className="object-cover"
+              quality={100}
             />
 
-            {/* Arrows */}
             {total > 1 && (
               <div className="absolute inset-0 flex items-center justify-between px-3 sm:px-5">
                 <Button
                   onClick={prev}
+                  type="button"
                   variant="secondary"
-                  className="h-10 w-10 sm:h-11 sm:w-11 rounded-full p-0 bg-white/90 hover:bg-white shadow-md"
+                  className="h-10 w-10 rounded-full bg-white/90 p-0 shadow-md hover:bg-white sm:h-11 sm:w-11"
                   aria-label="Previous image"
                 >
-                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-[#0B1C39]" />
+                  <ChevronLeft className="h-5 w-5 text-[#0B1C39] sm:h-6 sm:w-6" />
                 </Button>
 
                 <Button
                   onClick={next}
+                  type="button"
                   variant="secondary"
-                  className="h-10 w-10 sm:h-11 sm:w-11 rounded-full p-0 bg-white/90 hover:bg-white shadow-md"
+                  className="h-10 w-10 rounded-full bg-white/90 p-0 shadow-md hover:bg-white sm:h-11 sm:w-11"
                   aria-label="Next image"
                 >
-                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-[#0B1C39]" />
+                  <ChevronRight className="h-5 w-5 text-[#0B1C39] sm:h-6 sm:w-6" />
                 </Button>
               </div>
             )}
 
-            {/* Dots */}
             {total > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
                 <div className="flex items-center gap-2.5">
                   {galleryImages.map((_, idx) => (
                     <button
                       key={idx}
+                      type="button"
                       onClick={() => setActive(idx)}
                       aria-label={`Go to image ${idx + 1}`}
                       className={`h-2.5 w-2.5 rounded-full transition-all ${
-                        idx === active ? "bg-[#0B1C39] scale-125" : "bg-[#D7E6FF]"
+                        idx === active
+                          ? "scale-125 bg-[#0B1C39]"
+                          : "bg-[#D7E6FF]"
                       }`}
                     />
                   ))}
@@ -108,47 +112,51 @@ export function PropertyImageGallery({ images, title = "Property" }: PropertyIma
         {/* Thumbnails */}
         {total > 1 && (
           <div className="mt-4 md:mt-5">
-            <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-3 scrollbar-thin">
+            <div className="scrollbar-thin flex gap-2.5 overflow-x-auto pb-3 sm:gap-3">
               {visibleThumbs.map((img, idx) => {
                 const isActive = idx === active;
+
                 return (
                   <button
                     key={img.id}
+                    type="button"
                     onClick={() => setActive(idx)}
                     className={`relative flex-shrink-0 overflow-hidden rounded-xl border transition-all ${
                       isActive
-                        ? "border-[#0B1C39] ring-2 ring-[#0B1C39]/20 scale-[1.03]"
+                        ? "scale-[1.03] border-[#0B1C39] ring-2 ring-[#0B1C39]/20"
                         : "border-[#E5E5E5] hover:border-gray-300"
                     }`}
-                    style={{
-                      height: "72px",
-                      width: "120px",
-                    }}
+                    style={{ height: "72px", width: "120px" }}
                     aria-label={`Select ${img.alt}`}
                   >
-                    <Image src={img.src} alt={img.alt} fill className="object-cover" />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition" />
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      fill
+                      sizes="120px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 transition hover:bg-black/10" />
                   </button>
                 );
               })}
 
               {remaining > 0 && (
                 <button
+                  type="button"
                   onClick={() => setActive(thumbsToShow)}
                   className="relative flex-shrink-0 overflow-hidden rounded-xl border border-[#E5E5E5]"
-                  style={{
-                    height: "72px",
-                    width: "120px",
-                  }}
+                  style={{ height: "72px", width: "120px" }}
                   aria-label={`View ${remaining} more photos`}
                 >
                   <Image
                     src={galleryImages[thumbsToShow]?.src || galleryImages[0].src}
                     alt="More photos"
                     fill
+                    sizes="120px"
                     className="object-cover brightness-75"
                   />
-                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-xs font-medium">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-xs font-medium text-white">
                     <span>+{remaining}</span>
                     <span>more</span>
                   </div>

@@ -10,6 +10,7 @@ import {
 import { useSession } from 'next-auth/react'
 import { useQuery } from '@tanstack/react-query'
 import { dashboardKeys, getUserOverview } from '@/lib/queries/dashboard'
+import { useRouter } from 'next/navigation'
 
 type StatCardProps = {
   title: string
@@ -83,6 +84,7 @@ export default function UserDashboardOverview() {
   const { data: session } = useSession()
   const token = session?.user?.accessToken
   const currentYear = new Date().getFullYear()
+  const router = useRouter()
 
   const { data: overviewData, isLoading } = useQuery({
     queryKey: dashboardKeys.overview(currentYear),
@@ -127,14 +129,17 @@ export default function UserDashboardOverview() {
     {
       title: 'View Saved Properties',
       icon: <Bookmark className="h-4 w-4" />,
+      onClick: () => router.push('/user/dashboard/saved-properties'),
     },
     {
       title: 'Book a Site Visit',
       icon: <CalendarCheck className="h-4 w-4" />,
+      onClick: () => router.push('/user/dashboard/site-visit-calendar'),
     },
     {
       title: 'Update Profile',
       icon: <UserRound className="h-4 w-4" />,
+      onClick: () => router.push('/user/dashboard/settings'),
     },
   ]
 

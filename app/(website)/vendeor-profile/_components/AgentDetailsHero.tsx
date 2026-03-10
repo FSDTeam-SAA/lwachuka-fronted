@@ -17,6 +17,8 @@ interface Agent {
   role: string;
   phoneNumber?: string;
   profileImage?: string;
+  approvedPropertyCount?: number;
+  advertisementCount?: number;
  
 }
 
@@ -26,7 +28,8 @@ const fallbackAgent = {
   company: "—",
   photo: "/placeholder-agent.jpg", 
   specialty: "—",
-  activeListings: "—",
+  activeLabel: "Active Listings",
+  activeCount: "—",
   phone: "-",
   email: "—",
 };
@@ -51,14 +54,29 @@ export default function AgentDetailsHero() {
   });
 
   // Merge real data or use fallback
+  const activeLabel =
+    agentData?.role === "vendor" ? "Active Advertisement" : "Active Listings";
+  const activeCount =
+    agentData?.role === "vendor"
+      ? agentData?.advertisementCount
+      : agentData?.approvedPropertyCount;
+
+  const whatsappNumber = agentData?.phoneNumber
+    ? agentData.phoneNumber.replace(/\D/g, "")
+    : "";
+  const whatsappLink = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}`
+    : "";
+
   const agent = agentData
     ? {
         name: `${agentData.firstName} ${agentData.lastName}`,
-        company: "Prime Properties Kenya", 
+        company: "Prime Properties Kenya",
         photo: agentData.profileImage || fallbackAgent.photo,
-        specialty: "Apartment & Condos", 
-        activeListings: 18, 
-        phone: agentData.phoneNumber || fallbackAgent.phone, 
+        specialty: "Apartment & Condos",
+        activeLabel,
+        activeCount: activeCount ?? "—",
+        phone: agentData.phoneNumber || fallbackAgent.phone,
         email: agentData.email,
       }
     : fallbackAgent;
@@ -76,7 +94,7 @@ export default function AgentDetailsHero() {
       <div className="mx-auto container px-4 sm:px-6 lg:px-8">
         {/* Back link */}
         <Link
-          href="/agents" 
+          href="/agent&vendor" 
           className="inline-flex items-center gap-2 text-sm text-[#D3920E] hover:opacity-80"
         >
           ← Back to all agents
@@ -145,12 +163,14 @@ export default function AgentDetailsHero() {
                 </div>
 
                 <div className="rounded-xl bg-[#EFF2F6] px-5 py-4">
-                  <p className="text-sm text-[#7D7D7D]">Active Listings</p>
+                  <p className="text-sm text-[#7D7D7D]">
+                    {isLoading ? "Active Listings" : agent.activeLabel}
+                  </p>
                   {isLoading ? (
                     <div className="mt-2 h-6 w-16 bg-gray-300 rounded animate-pulse" />
                   ) : (
                     <p className="mt-1 text-base font-semibold text-[#051E3C]">
-                      {agent.activeListings}
+                      {agent.activeCount}
                     </p>
                   )}
                 </div>
@@ -178,10 +198,19 @@ export default function AgentDetailsHero() {
 
               {/* Button */}
               <Button
-                disabled={isLoading}
+                asChild={!isLoading && !!whatsappLink}
+                disabled={isLoading || !whatsappLink}
                 className="mt-7 h-11 px-8 rounded-md bg-[#061F3D] hover:bg-[#061F3D]/90 text-white disabled:opacity-50"
               >
-                {isLoading ? "Loading..." : "Contact Agent"}
+                {isLoading ? (
+                  "Loading..."
+                ) : whatsappLink ? (
+                  <a href={whatsappLink} target="_blank" rel="noreferrer">
+                    Contact Agent
+                  </a>
+                ) : (
+                  "Contact Agent"
+                )}
               </Button>
             </div>
           </div>

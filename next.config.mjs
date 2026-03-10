@@ -3,12 +3,17 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
       },
     ],
-  },
-}
 
-export default nextConfig
+    // allow high quality images
+    qualities: [75, 90, 100],
+
+
+  },
+};
+
+export default nextConfig;

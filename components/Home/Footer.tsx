@@ -126,10 +126,10 @@ export function Footer() {
           <p>© 2026 PropertyHub Kenya. All rights reserved.</p>
 
           <div className="flex items-center gap-8">
-            <Link href="#" className="hover:text-white transition">
+            <Link href="/privacy-policy" className="hover:text-white transition">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-white transition">
+            <Link href="/terms" className="hover:text-white transition">
               Terms of Service
             </Link>
           </div>
