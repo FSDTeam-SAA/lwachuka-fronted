@@ -30,7 +30,7 @@ export default function EmailModal({ open, onOpenChange, listing }: EmailModalPr
   });
   const labelClass = "text-[12px] font-semibold text-[#1F2937]";
   const inputClass =
-    "mt-1 h-11 w-full rounded-md border border-[#D1D5DB] bg-white px-3 text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#9CA3AF]";
+    "mt-1 h-11 w-full rounded-md border border-[#D1D5DB] bg-white px-3  text-[14px] text-[#111827] placeholder:text-[#9CA3AF] outline-none focus:border-[#9CA3AF]";
   const dialogTitle = listing?.title
     ? `Email about ${listing.title}`
     : "Email Agent";

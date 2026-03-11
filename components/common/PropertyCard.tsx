@@ -153,7 +153,7 @@ export function PropertyCard({
           </Pill>
         </div>
 
-        <p className="mt-4 text-[15px] font-medium text-[#2E353A]">
+        <p className="mt-4 text-[15px] font-medium text-[#2E353A] line-clamp-1">
           {tagline}
         </p>
         {isAgentView ? (
@@ -167,7 +167,7 @@ export function PropertyCard({
         ) : (
           <Link href={`/property-buy/${id}`}>
             <Button className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
-              View Details
+              View Details 
             </Button>
           </Link>
         )}

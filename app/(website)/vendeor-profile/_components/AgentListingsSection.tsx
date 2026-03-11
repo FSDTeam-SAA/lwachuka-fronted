@@ -1,15 +1,18 @@
+/*eslint-disable  */
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, Share2, MapPin, BedDouble, Bath, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton"; 
 import EmailModal from "@/app/(website)/serach-result/_components/EmailModal";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import api from "@/lib/api";
 
 // ────────TYPES─────────────────────────────
 interface Property {
@@ -27,6 +30,7 @@ interface Property {
   images: string[];
   status: string;
   createdAt: string;
+  bookmarkUser?: Array<string | { _id?: string }>;
 }
 
 interface ApiResponse {
@@ -110,10 +114,18 @@ const formatPrice = (price: number) => `KSh ${(price / 1_000_000).toFixed(1)}M`;
 
 function ListingRow({
   property,
+  isBookmarked,
+  isBookmarkLoading,
+  onBookmarkToggle,
+  onShareClick,
   onEmailClick,
   onWhatsAppClick,
 }: {
   property: Property;
+  isBookmarked: boolean;
+  isBookmarkLoading: boolean;
+  onBookmarkToggle: (property: Property) => void;
+  onShareClick: (property: Property) => void;
   onEmailClick: (listing: Property) => void;
   onWhatsAppClick: () => void;
 }) {
@@ -155,13 +167,27 @@ function ListingRow({
             </div>
 
             <div className="flex items-center gap-4 text-xs text-[#6F6F6F]">
-              <button className="inline-flex items-center gap-2 hover:text-[#0B1C39] transition">
+              <button
+                className="inline-flex items-center gap-2 hover:text-[#0B1C39] transition"
+                type="button"
+                onClick={() => onShareClick(property)}
+              >
                 <Share2 className="h-4 w-4" />
-                Share
+                Share 
               </button>
-              <button className="inline-flex items-center gap-2 hover:text-[#0B1C39] transition">
-                <Heart className="h-4 w-4" />
-                Favorite
+              <button
+                className="inline-flex items-center gap-2 hover:text-[#0B1C39] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                type="button"
+                onClick={() => onBookmarkToggle(property)}
+                disabled={isBookmarkLoading}
+                aria-pressed={isBookmarked}
+                aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+              >
+                <Heart
+                  className={`h-4 w-4 ${isBookmarked ? "text-red-500" : ""}`}
+                  fill={isBookmarked ? "currentColor" : "none"}
+                />
+                {isBookmarked ? "Favorite" : "Favorite"}
               </button>
             </div>
           </div>
@@ -257,6 +283,11 @@ export default function AgentListingsSection() {
   const agentId = params.id as string; 
   const [emailOpen, setEmailOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Property | null>(null);
+  const { data: session } = useSession();
+  const userId = session?.user?._id as string | undefined;
+  const queryClient = useQueryClient();
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [bookmarkLoadingId, setBookmarkLoadingId] = useState<string | null>(null);
 
   const {
     data: properties = [],
@@ -281,6 +312,28 @@ export default function AgentListingsSection() {
 
   const title = `Sarah Wanjiku's Listings (${properties.length})`;
   // ↑ in real app you would fetch agent name too or get it from parent props/context
+
+  useEffect(() => {
+    if (!properties || !userId) {
+      setBookmarkedIds(new Set());
+      return;
+    }
+
+    const initial = new Set<string>();
+    properties.forEach((property) => {
+      const bookmarks = property.bookmarkUser ?? [];
+      const hasBookmark = bookmarks.some((entry) => {
+        if (typeof entry === "string") return entry === userId;
+        if (entry && typeof entry === "object") {
+          return entry._id === userId;
+        }
+        return false;
+      });
+      if (hasBookmark) initial.add(property._id);
+    });
+
+    setBookmarkedIds(initial);
+  }, [properties, userId]);
   const openEmailModal = (listing: Property) => {
     setSelectedListing(listing);
     setEmailOpen(true);
@@ -303,6 +356,130 @@ export default function AgentListingsSection() {
     }
 
     window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
+  };
+
+  const handleShareClick = async (property: Property) => {
+    if (!property?._id) return;
+
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/property-buy/${property._id}`
+        : "";
+
+    if (!url) {
+      toast.error("Unable to generate share link.");
+      return;
+    }
+
+    const title = property.title || "Property listing";
+    const textParts = [
+      property.title,
+      property.location,
+      property.price ? formatPrice(property.price) : "",
+    ].filter(Boolean);
+    const text = textParts.join(" • ");
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        toast.success("Link shared.");
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        // fall through to clipboard as backup
+      }
+    }
+
+   
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied.");
+        return;
+      }
+    
+
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      toast.success("Link copied.");
+    } catch (error) {
+      toast.error("Failed to share link."+ error);
+    }
+  };
+
+  const bookmarkMutation = useMutation<
+    void,
+    Error,
+    { propertyId: string; action: "add" | "remove" },
+    { propertyId: string; action: "add" | "remove" }
+  >({
+    mutationFn: async ({ propertyId, action }) => {
+      if (action === "add") {
+        await api.post(`/bookmark/${propertyId}`);
+        return;
+      }
+      await api.delete(`/bookmark/${propertyId}`);
+    },
+    onMutate: async ({ propertyId, action }) => {
+      setBookmarkLoadingId(propertyId);
+      setBookmarkedIds((prev) => {
+        const next = new Set(prev);
+        if (action === "add") {
+          next.add(propertyId);
+        } else {
+          next.delete(propertyId);
+        }
+        return next;
+      });
+      return { propertyId, action };
+    },
+    onError: (error, variables, context) => {
+      const message = error?.message || "Failed to update bookmark.";
+      toast.error(message);
+      if (context) {
+        setBookmarkedIds((prev) => {
+          const next = new Set(prev);
+          if (context.action === "add") {
+            next.delete(context.propertyId);
+          } else {
+            next.add(context.propertyId);
+          }
+          return next;
+        });
+      }
+    },
+    onSuccess: (_data, variables) => {
+      toast.success(
+        variables.action === "add" ? "Property bookmarked." : "Bookmark removed."
+      );
+    },
+    onSettled: (_data, _error, _variables) => {
+      setBookmarkLoadingId(null);
+      queryClient.invalidateQueries({ queryKey: ["agent-properties", agentId] });
+    },
+  });
+
+  const handleBookmarkToggle = (property: Property) => {
+    if (!property?._id) return;
+    if (!userId) {
+      toast.error("Please login to bookmark properties.");
+      return;
+    }
+
+    const isBookmarked = bookmarkedIds.has(property._id);
+    bookmarkMutation.mutate({
+      propertyId: property._id,
+      action: isBookmarked ? "remove" : "add",
+    });
   };
 
   if (isError) {
@@ -346,6 +523,10 @@ export default function AgentListingsSection() {
               <ListingRow
                 key={property._id}
                 property={property}
+                isBookmarked={bookmarkedIds.has(property._id)}
+                isBookmarkLoading={bookmarkLoadingId === property._id}
+                onBookmarkToggle={handleBookmarkToggle}
+                onShareClick={handleShareClick}
                 onEmailClick={openEmailModal}
                 onWhatsAppClick={handleWhatsAppClick}
               />
