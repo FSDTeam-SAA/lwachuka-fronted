@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import ReactQueryProvider from '@/components/providers/ReactQueryProvider'
 import { Toaster } from '@/components/ui/sonner'
 import NextTopLoader from 'nextjs-toploader'
+import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider'
 
 const manrope = Manrope({
   subsets: ['latin'],
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body className={`${manrope.className} antialiased`}>
         <NextTopLoader color="#061F3D" height={3} showSpinner={false} />
         <ReactQueryProvider>
+          <SmoothScrollProvider>
           <Providers>
             {children}
             <Toaster position="bottom-right" />
           </Providers>
+          </SmoothScrollProvider>
         </ReactQueryProvider>
       </body>
     </html>
