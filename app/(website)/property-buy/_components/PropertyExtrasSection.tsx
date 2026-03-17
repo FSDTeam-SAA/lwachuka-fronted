@@ -25,6 +25,8 @@ import {
 import { Button } from "@/components/ui/button";
 import ContactModal from "./ContactModal";
 import { Property } from "@/types/PropertyType";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 const formatPrice = (price?: number, listingType?: Property["listingType"]) => {
   if (price == null) return "N/A";
@@ -86,6 +88,8 @@ const formatBuiltUp = (value?: number | string) => {
 /* ---------------- COMPONENT ---------------- */
 
 export function PropertyExtrasSection({ property }: { property: Property }) {
+  const session = useSession();
+  const islogin = session?.status;
   const bedroomsLabel = hasValue(property.keyBedRooms)
     ? `Bedrooms: ${property.keyBedRooms}`
     : property.bedrooms != null
@@ -262,7 +266,16 @@ export function PropertyExtrasSection({ property }: { property: Property }) {
           <div className="mt-10 flex justify-center">
             <ContactModal
               trigger={
-                <Button className="h-10 rounded-md bg-[#B78222] px-10 text-white hover:bg-[#9f6f1d]">
+                <Button
+                  className="h-10 rounded-md bg-[#B78222] px-10 text-white hover:bg-[#9f6f1d]"
+                  onClick={(event) => {
+                    if (islogin === "unauthenticated") {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      toast.error("Please login");
+                    }
+                  }}
+                >
                   Contact Now
                 </Button>
               }

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import VendorCard from "@/components/common/VendorCard";
 import { VendorCardSkeleton } from "@/components/skeleton/VendorCardSkeleton";
+import { useSession } from "next-auth/react";
 
 type TabKey = "agent" | "vendor";
 
@@ -56,6 +57,10 @@ async function fetchUsers(role: TabKey): Promise<ApiResponse> {
 }
 
 export default function TrustedAgentsVendors() {
+  const { data: session } = useSession();
+  const userId = session?.user?._id as string | undefined;
+  const isLoggedIn = !!userId;
+
   const [tab, setTab] = useState<TabKey>("agent");
   const agentsQuery = useQuery<ApiResponse, Error>({
     queryKey: ["agents"],
@@ -165,6 +170,8 @@ export default function TrustedAgentsVendors() {
                 advertisementCount={item.advertisementCount ?? 0}
                 image={item.profileImage || "/vendor.png"}
                 phoneNumber={item.phoneNumber}
+                requireLoginForWhatsApp
+                isLoggedIn={isLoggedIn}
               />
             ))}
           </div>

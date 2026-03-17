@@ -15,6 +15,8 @@ interface VendorCardProps {
   role?: "agent" | "vendor";
   advertisementCount?: number;
   phoneNumber?: string;
+  requireLoginForWhatsApp?: boolean;
+  isLoggedIn?: boolean;
 }
 
 export default function VendorCard({
@@ -26,8 +28,15 @@ export default function VendorCard({
   listings,
   advertisementCount,
   phoneNumber,
+  requireLoginForWhatsApp,
+  isLoggedIn,
 }: VendorCardProps) {
   const handleWhatsAppClick = () => {
+    if (requireLoginForWhatsApp && !isLoggedIn) {
+      toast.error("Please login to message on WhatsApp.");
+      return;
+    }
+
     const trimmed = phoneNumber?.trim() ?? "";
 
     if (!trimmed) {

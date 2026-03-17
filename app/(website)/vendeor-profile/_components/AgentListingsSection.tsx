@@ -46,7 +46,42 @@ interface ApiResponse {
 }
 
 interface Agent {
+  _id?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: "agent" | "vendor" | string;
   phoneNumber?: string;
+}
+
+interface Advertisement {
+  _id: string;
+  companyName: string;
+  advertisementType: string;
+  callToActionURL?: string;
+  uploadMedia?: string;
+  targetRegions?: string[];
+  targetAudience?: string[];
+  compaingBudget?: number;
+  compaingDuration?: string;
+  campaignBudget?: number;
+  campaignDuration?: string;
+  startDate?: string;
+  endDate?: string;
+  paymentStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface AdvertisementApiResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  meta: {
+    total: number;
+    limit: number;
+    page: number;
+  };
+  data: Advertisement[];
 }
 
 // ────────── API FETCHER────────────────────────────────────────
@@ -67,6 +102,22 @@ const fetchAgent = async (agentId: string): Promise<Agent> => {
     `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/${agentId}`
   );
   return response.data?.data ?? {};
+};
+
+const fetchVendorAdvertisements = async (
+  vendorId: string
+): Promise<Advertisement[]> => {
+  const response = await axios.get<AdvertisementApiResponse>(
+    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/advertisement/vendor/${vendorId}`
+  );
+
+  if (!response.data.success) {
+    throw new Error(
+      response.data.message || "Failed to fetch vendor advertisements"
+    );
+  }
+
+  return response.data.data ?? [];
 };
 
 // ─────SKELETON ROW─────────────────────────────────────────────
@@ -277,6 +328,87 @@ function Pill({
   );
 }
 
+// ──────ADVERTISEMENT CARD────────────────────────────────────
+const isVideoAd = (ad: Advertisement) => {
+  const type = ad.advertisementType?.toLowerCase() || "";
+  const media = ad.uploadMedia || "";
+  return type === "video" || /\.(mp4|webm|ogg)(\?|#|$)/i.test(media);
+};
+
+function AdvertisementCard({ ad }: { ad: Advertisement }) {
+  const duration = ad.compaingDuration || ad.campaignDuration || "—";
+  const hasMedia = Boolean(ad.uploadMedia);
+  const isVideo = isVideoAd(ad);
+
+  return (
+    <div className="rounded-xl border border-[#EDEDED] bg-white overflow-hidden">
+      <div className="relative h-[220px] w-full bg-[#F4F6F8]">
+        {!hasMedia ? (
+          <div className="flex h-full items-center justify-center text-sm text-gray-400">
+            No media
+          </div>
+        ) : isVideo ? (
+          <video
+            src={ad.uploadMedia}
+            className="h-full w-full object-cover"
+            controls
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          <Image
+            src={ad.uploadMedia as string}
+            alt={`${ad.companyName} advertisement`}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized
+          />
+        )}
+      </div>
+
+      <div className="p-4">
+        <p className="text-lg font-semibold text-[#1E1E1E] line-clamp-1">
+          {ad.companyName}
+        </p>
+        <p className="mt-1 text-sm text-[#7D7D7D]">
+          {ad.advertisementType} • {duration}
+        </p>
+
+        {ad.targetRegions && ad.targetRegions.length > 0 && (
+          <p className="mt-2 text-xs text-[#7D7D7D] line-clamp-1">
+            Regions: {ad.targetRegions.join(", ")}
+          </p>
+        )}
+
+        {/* {ad.callToActionURL ? (
+          <Button
+            asChild
+            className="mt-4 h-9 rounded-md bg-[#061F3D] hover:bg-[#061F3D]/90 text-white"
+          >
+            <a href={ad.callToActionURL} target="_blank" rel="noreferrer">
+              Visit
+            </a>
+          </Button>
+        ) : null} */}
+      </div>
+    </div>
+  );
+}
+
+function AdvertisementCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-[#EDEDED] bg-white overflow-hidden">
+      <Skeleton className="h-[220px] w-full" />
+      <div className="p-4 space-y-2">
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-8 w-24" />
+      </div>
+    </div>
+  );
+}
+
 // ──────────────MAIN COMPONENT────────────────────────────────────────
 export default function AgentListingsSection() {
   const params = useParams();
@@ -291,7 +423,7 @@ export default function AgentListingsSection() {
 
   const {
     data: properties = [],
-    isLoading,
+    isLoading: isPropertiesLoading,
     isError,
     error,
   } = useQuery<Property[], Error>({
@@ -301,17 +433,37 @@ export default function AgentListingsSection() {
     staleTime: 5 * 60 * 1000, 
   });
 
-  const { data: agentData } = useQuery<Agent, Error>({
+  const { data: agentData, isLoading: isAgentLoading } = useQuery<Agent, Error>({
     queryKey: ["agent", agentId],
     queryFn: () => fetchAgent(agentId),
     enabled: !!agentId,
     staleTime: 5 * 60 * 1000,
   });
 
+  const isVendor = agentData?.role === "vendor";
+
+  const {
+    data: advertisements = [],
+    isLoading: isAdvertisementsLoading,
+    isError: isAdvertisementsError,
+    error: advertisementsError,
+  } = useQuery<Advertisement[], Error>({
+    queryKey: ["vendor-advertisements", agentId],
+    queryFn: () => fetchVendorAdvertisements(agentId),
+    enabled: !!agentId && isVendor,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const agentPhone = agentData?.phoneNumber;
 
-  const title = `Sarah Wanjiku's Listings (${properties.length})`;
-  // ↑ in real app you would fetch agent name too or get it from parent props/context
+  const displayName = [agentData?.firstName, agentData?.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const fallbackLabel = isVendor ? "Vendor" : "Agent";
+  const title = isVendor
+    ? `${displayName || fallbackLabel} Advertisements (${advertisements.length})`
+    : `${displayName || fallbackLabel} Listings (${properties.length})`;
 
   useEffect(() => {
     if (!properties || !userId) {
@@ -335,11 +487,21 @@ export default function AgentListingsSection() {
     setBookmarkedIds(initial);
   }, [properties, userId]);
   const openEmailModal = (listing: Property) => {
+    if (!userId) {
+      toast.error("Please login to email the agent.");
+      return;
+    }
+
     setSelectedListing(listing);
     setEmailOpen(true);
   };
 
   const handleWhatsAppClick = () => {
+    if (!userId) {
+      toast.error("Please login to message on WhatsApp.");
+      return;
+    }
+
     const trimmed = agentPhone?.trim() ?? "";
 
     if (!trimmed) {
@@ -482,38 +644,52 @@ export default function AgentListingsSection() {
     });
   };
 
-  if (isError) {
-    return (
-      <section className="py-10 md:py-14 bg-white">
-        <div className="mx-auto container px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl sm:text-4xl font-bold text-[#061F3D]">
-            Agent Listings
-          </h2>
-          <div className="mt-6 p-6 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            <p className="font-medium">Failed to load listings</p>
-            <p className="text-sm mt-1">{error?.message || "Unknown error"}</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className="py-10 md:py-14 bg-white">
       <div className="mx-auto container px-4 sm:px-6 lg:px-8">
         {/* Title */}
         <h2 className="text-xl sm:text-4xl font-bold text-[#061F3D]">
-          {isLoading ? <Skeleton className="h-10 w-64" /> : title}
+          {isAgentLoading ? <Skeleton className="h-10 w-64" /> : title}
         </h2>
 
         {/* Listings / Skeletons */}
         <div className="mt-6 space-y-4">
-          {isLoading ? (
+          {isVendor ? (
+            isAdvertisementsLoading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <AdvertisementCardSkeleton key={`ad-skel-${i}`} />
+                ))}
+              </div>
+            ) : isAdvertisementsError ? (
+              <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <p className="font-medium">Failed to load advertisements</p>
+                <p className="text-sm mt-1">
+                  {advertisementsError?.message || "Unknown error"}
+                </p>
+              </div>
+            ) : advertisements.length === 0 ? (
+              <div className="p-10 text-center text-gray-500 border border-dashed rounded-lg">
+                No advertisements found for this vendor.
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {advertisements.map((ad) => (
+                  <AdvertisementCard key={ad._id} ad={ad} />
+                ))}
+              </div>
+            )
+          ) : isPropertiesLoading ? (
             <>
               <ListingRowSkeleton />
               <ListingRowSkeleton />
               <ListingRowSkeleton />
             </>
+          ) : isError ? (
+            <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <p className="font-medium">Failed to load listings</p>
+              <p className="text-sm mt-1">{error?.message || "Unknown error"}</p>
+            </div>
           ) : properties.length === 0 ? (
             <div className="p-10 text-center text-gray-500 border border-dashed rounded-lg">
               No approved properties found for this agent.

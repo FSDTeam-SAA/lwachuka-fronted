@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   MapPin,
@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 
 
-type TabKey = "all" | "dubai" | "abudhabi" | "sharjah" | "ras";
+type TabKey = string;
 
 type Listing = {
   id: string;
@@ -279,7 +279,7 @@ function MapPanel({
           {points.length} location{points.length > 1 ? "s" : ""} selected
         </p>
       </div>
-      <div className="relative h-[380px] sm:h-[440px] lg:h-[520px] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+      <div className="relative z-0 h-[380px] sm:h-[440px] lg:h-[520px] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
         <div ref={mapRef} className="h-full w-full" />
         {!mapReady ? (
           <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-500">
@@ -423,7 +423,9 @@ function ListingCard({
 /* ----------------------- Page ----------------------- */
 
 export default function ResultsClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const locationParam = (searchParams.get("location") || "").trim();
   const [showPins, setShowPins] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const { data: session } = useSession();
@@ -441,6 +443,11 @@ export default function ResultsClient() {
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
   const openEmailModal = (listing: Listing) => {
+    if (!userId) {
+      toast.error("Please login to email the agent.");
+      return;
+    }
+
     setSelectedListing(listing);
     setEmailOpen(true);
   };
@@ -454,7 +461,7 @@ export default function ResultsClient() {
     propertyType: searchParams.get("propertyType") || "all",
   };
 
-  const queryString = useMemo(() => {
+  const buildQueryString = (includeLocation: boolean) => {
     const query = new URLSearchParams();
 
     const searchTerm = searchParams.get("type");
@@ -465,7 +472,7 @@ export default function ResultsClient() {
     const transaction = searchParams.get("transaction");
 
     if (searchTerm) query.set("searchTerm", searchTerm);
-    if (location) query.set("location", location);
+    if (includeLocation && location) query.set("location", location);
     if (price) query.set("price", price);
     if (propertyType && propertyType.toLowerCase() !== "all") {
       query.set("propertyType", propertyType);
@@ -489,15 +496,24 @@ export default function ResultsClient() {
 
     query.set("status", "approved");
     return query.toString();
-  }, [searchParams]);
+  };
 
-  const fetchProperties = async (): Promise<Property[]> => {
+  const queryString = useMemo(
+    () => buildQueryString(true),
+    [searchParams]
+  );
+  const queryStringWithoutLocation = useMemo(
+    () => buildQueryString(false),
+    [searchParams]
+  );
+
+  const fetchProperties = async (query: string): Promise<Property[]> => {
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL;
     if (!baseUrl) {
       throw new Error("Missing NEXT_PUBLIC_BACKEND_API_URL");
     }
 
-    const res = await fetch(`${baseUrl}/property/?${queryString}`, {
+    const res = await fetch(`${baseUrl}/property/?${query}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -517,7 +533,14 @@ export default function ResultsClient() {
 
   const { data, isLoading, isError } = useQuery<Property[], Error>({
     queryKey: ["search-properties", queryString],
-    queryFn: fetchProperties,
+    queryFn: () => fetchProperties(queryString),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const { data: locationData } = useQuery<Property[], Error>({
+    queryKey: ["search-properties-locations", queryStringWithoutLocation],
+    queryFn: () => fetchProperties(queryStringWithoutLocation),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
@@ -582,7 +605,57 @@ export default function ResultsClient() {
     });
   }, [data]);
 
+  const locationTabs = useMemo(() => {
+    const source = locationData ?? data ?? [];
+    if (source.length === 0) return [];
+
+    const deduped = new Map<string, { key: string; label: string; count: number }>();
+
+    for (const property of source) {
+      const raw = (property.location || "").toString().trim();
+      if (!raw) continue;
+      const key = raw.toLowerCase();
+      const existing = deduped.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        deduped.set(key, { key, label: raw, count: 1 });
+      }
+    }
+
+    return Array.from(deduped.values()).sort((a, b) =>
+      a.label.localeCompare(b.label)
+    );
+  }, [locationData, data]);
+
+  useEffect(() => {
+    if (!locationParam) {
+      setActiveTab("all");
+      return;
+    }
+    setActiveTab(locationParam.toLowerCase());
+  }, [locationParam]);
+
+  const handleLocationTabClick = (tabKey: string, locationValue?: string) => {
+    setActiveTab(tabKey);
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (!locationValue) {
+      params.delete("location");
+    } else {
+      params.set("location", locationValue);
+    }
+
+    const query = params.toString();
+    router.push(`/serach-result${query ? `?${query}` : ""}`);
+  };
+
   const handleWhatsAppClick = (listing: Listing) => {
+    if (!userId) {
+      toast.error("Please login to message on WhatsApp.");
+      return;
+    }
+
     const trimmed = listing.phoneNumber?.trim() ?? "";
 
     if (!trimmed) {
@@ -642,7 +715,7 @@ export default function ResultsClient() {
     setSelectedMapListing(listing);
 
     if (!userId) {
-      toast.error("Please login to bookmark properties.");
+      toast.error("Please login.");
       return;
     }
 
@@ -705,27 +778,18 @@ export default function ResultsClient() {
         {/* Tabs row */}
         <div className="mt-4 rounded-xl border border-slate-200 bg-white p-2">
           <div className="flex flex-wrap gap-2">
-            <PillTab active={activeTab === "all"} onClick={() => setActiveTab("all")}>
-              All (68)
+            <PillTab active={activeTab === "all"} onClick={() => handleLocationTabClick("all")}>
+              All ({(locationData ?? data ?? []).length})
             </PillTab>
-            <PillTab active={activeTab === "dubai"} onClick={() => setActiveTab("dubai")}>
-              Dubai (25)
-            </PillTab>
-            <PillTab
-              active={activeTab === "abudhabi"}
-              onClick={() => setActiveTab("abudhabi")}
-            >
-              Abu Dhabi (15)
-            </PillTab>
-            <PillTab
-              active={activeTab === "sharjah"}
-              onClick={() => setActiveTab("sharjah")}
-            >
-              Sharjah (15)
-            </PillTab>
-            <PillTab active={activeTab === "ras"} onClick={() => setActiveTab("ras")}>
-              Ras Al Khaimah (13)
-            </PillTab>
+            {locationTabs.map((tab) => (
+              <PillTab
+                key={tab.key}
+                active={activeTab === tab.key}
+                onClick={() => handleLocationTabClick(tab.key, tab.label)}
+              >
+                {tab.label} ({tab.count})
+              </PillTab>
+            ))}
           </div>
         </div>
 

@@ -4,6 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import VendorCard from "../common/VendorCard";
 import { VendorCardSkeleton } from "../skeleton/VendorCardSkeleton";
+import { useSession } from "next-auth/react";
 
 interface Agent {
   _id: string;
@@ -43,6 +44,10 @@ async function fetchAgents(): Promise<ApiResponse> {
 }
 
 export function AgentsSection() {
+  const { data: session } = useSession();
+  const userId = session?.user?._id as string | undefined;
+  const isLoggedIn = !!userId;
+
   const { data, isLoading, error } = useQuery<ApiResponse, Error>({
     queryKey: ["agents"],
     queryFn: fetchAgents,
@@ -100,6 +105,8 @@ export function AgentsSection() {
                   image={image}
                   listings={agent.approvedPropertyCount ?? 0}
                   phoneNumber={agent.phoneNumber}
+                  requireLoginForWhatsApp
+                  isLoggedIn={isLoggedIn}
                 />
               );
             })}
