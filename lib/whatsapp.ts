@@ -37,5 +37,7 @@ export const normalizeWhatsAppNumber = (value?: string | null) => {
 
 export const buildWhatsAppLink = (value?: string | null) => {
   const normalized = normalizeWhatsAppNumber(value);
-  return normalized ? `https://wa.me/${normalized}` : "";
+  return normalized
+    ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(normalized)}`
+    : "";
 };
