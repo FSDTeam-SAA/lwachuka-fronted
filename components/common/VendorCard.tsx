@@ -5,6 +5,7 @@ import { Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { toast } from "sonner";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 interface VendorCardProps {
   id: string;
@@ -37,22 +38,14 @@ export default function VendorCard({
       return;
     }
 
-    const trimmed = phoneNumber?.trim() ?? "";
+    const whatsappLink = buildWhatsAppLink(phoneNumber);
 
-    if (!trimmed) {
+    if (!whatsappLink) {
       toast.error("Not available on WhatsApp");
       return;
     }
 
-    const normalized = trimmed.replace(/[^\d+]/g, "");
-    const numberForLink = normalized.replace(/^\+/, "");
-
-    if (!numberForLink) {
-      toast.error("Not available on WhatsApp");
-      return;
-    }
-
-    window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
+    window.open(whatsappLink, "_blank", "noopener,noreferrer");
   };
 
   return (

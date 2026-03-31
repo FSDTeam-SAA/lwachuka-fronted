@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useParams } from "next/navigation";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 // Optional: define the expected shape
 interface Agent {
@@ -26,7 +27,7 @@ interface Agent {
 const fallbackAgent = {
   name: "Loading...",
   company: "—",
-  photo: "/placeholder-agent.jpg", 
+  photo: "/vendor.png",
   specialty: "—",
   activeLabel: "Active Listings",
   activeCount: "—",
@@ -61,12 +62,7 @@ export default function AgentDetailsHero() {
       ? agentData?.advertisementCount
       : agentData?.approvedPropertyCount;
 
-  const whatsappNumber = agentData?.phoneNumber
-    ? agentData.phoneNumber.replace(/\D/g, "")
-    : "";
-  const whatsappLink = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}`
-    : "";
+  const whatsappLink = buildWhatsAppLink(agentData?.phoneNumber);
 
   const agent = agentData
     ? {
