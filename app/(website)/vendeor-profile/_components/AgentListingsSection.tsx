@@ -13,6 +13,7 @@ import EmailModal from "@/app/(website)/serach-result/_components/EmailModal";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import api from "@/lib/api";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 // ────────TYPES─────────────────────────────
 interface Property {
@@ -502,22 +503,14 @@ export default function AgentListingsSection() {
       return;
     }
 
-    const trimmed = agentPhone?.trim() ?? "";
+    const whatsappLink = buildWhatsAppLink(agentPhone);
 
-    if (!trimmed) {
+    if (!whatsappLink) {
       toast.error("Not available on WhatsApp");
       return;
     }
 
-    const normalized = trimmed.replace(/[^\d+]/g, "");
-    const numberForLink = normalized.replace(/^\+/, "");
-
-    if (!numberForLink) {
-      toast.error("Not available on WhatsApp");
-      return;
-    }
-
-    window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
+    window.open(whatsappLink, "_blank", "noopener,noreferrer");
   };
 
   const handleShareClick = async (property: Property) => {

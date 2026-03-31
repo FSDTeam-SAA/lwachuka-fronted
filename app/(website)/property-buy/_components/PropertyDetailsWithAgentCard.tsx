@@ -5,6 +5,7 @@ import { MapPin, BedDouble, Bath, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/types/PropertyType";
 import { toast } from "sonner";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 type AgentLike = {
   firstName?: string;
@@ -56,7 +57,7 @@ export function PropertyDetailsWithAgentCard({ property }: { property: Property 
   const agentName =
     [rawAgent?.firstName, rawAgent?.lastName].filter(Boolean).join(" ") ||
     "Listing Agent";
-  const agentImage = rawAgent?.profileImage || "/agent-profile.jpg";
+  const agentImage = rawAgent?.profileImage || "/vendor.png";
   const agentExpertise =
     rawAgent?.expertise || "Residential Sales, Residential Leasing";
   const agentServiceArea =
@@ -70,24 +71,15 @@ export function PropertyDetailsWithAgentCard({ property }: { property: Property 
       : "Properties on request";
   const agentExperience = rawAgent?.experience || "Experienced Agent";
   const agentPhone = rawAgent?.phoneNumber;
+  const whatsappLink = buildWhatsAppLink(agentPhone);
 
   const handleWhatsAppClick = () => {
-    const trimmed = agentPhone?.trim() ?? "";
-
-    if (!trimmed) {
+    if (!whatsappLink) {
       toast.error("Not available on WhatsApp");
       return;
     }
 
-    const normalized = trimmed.replace(/[^\d+]/g, "");
-    const numberForLink = normalized.replace(/^\+/, "");
-
-    if (!numberForLink) {
-      toast.error("Not available on WhatsApp");
-      return;
-    }
-
-    window.open(`https://wa.me/${numberForLink}`, "_blank", "noopener,noreferrer");
+    window.open(whatsappLink, "_blank", "noopener,noreferrer");
   };
 
   const details = [

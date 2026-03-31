@@ -20,13 +20,17 @@ export function PropertyImageGallery({
   images,
   title = "Property",
 }: PropertyImageGalleryProps) {
-  const galleryImages: GalleryImage[] = images.map((src, index) => ({
+  const validImages = images.filter(Boolean);
+  const galleryImages: GalleryImage[] = validImages.map((src, index) => ({
     id: `${index + 1}`,
     src,
     alt: `${title} - Image ${index + 1}`,
   }));
 
   const [active, setActive] = React.useState(0);
+  const [failedImages, setFailedImages] = React.useState<Record<string, boolean>>(
+    {}
+  );
 
   const total = galleryImages.length;
 
@@ -39,6 +43,7 @@ export function PropertyImageGallery({
   }
 
   const activeImg = galleryImages[active];
+  const activeSrc = failedImages[activeImg.id] ? "/house.png" : activeImg.src;
 
   const next = () => setActive((p) => (p + 1) % total);
   const prev = () => setActive((p) => (p - 1 + total) % total);
@@ -54,13 +59,19 @@ export function PropertyImageGallery({
         <div className="relative overflow-hidden rounded-2xl border border-[#EDEDED] bg-[#F4F6F8] shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
           <div className="relative h-[260px] sm:h-[380px] md:h-[480px] lg:h-[560px] xl:h-[550px]">
             <Image
-              src={activeImg.src}
+              src={activeSrc}
               alt={activeImg.alt}
               fill
               priority
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1200px"
               className="object-cover"
               quality={100}
+              onError={() =>
+                setFailedImages((prevState) => ({
+                  ...prevState,
+                  [activeImg.id]: true,
+                }))
+              }
             />
 
             {total > 1 && (
@@ -130,11 +141,17 @@ export function PropertyImageGallery({
                     aria-label={`Select ${img.alt}`}
                   >
                     <Image
-                      src={img.src}
+                      src={failedImages[img.id] ? "/house.png" : img.src}
                       alt={img.alt}
                       fill
                       sizes="120px"
                       className="object-cover"
+                      onError={() =>
+                        setFailedImages((prevState) => ({
+                          ...prevState,
+                          [img.id]: true,
+                        }))
+                      }
                     />
                     <div className="absolute inset-0 bg-black/0 transition hover:bg-black/10" />
                   </button>
@@ -150,7 +167,11 @@ export function PropertyImageGallery({
                   aria-label={`View ${remaining} more photos`}
                 >
                   <Image
-                    src={galleryImages[thumbsToShow]?.src || galleryImages[0].src}
+                    src={
+                      failedImages[galleryImages[thumbsToShow]?.id || ""]
+                        ? "/house.png"
+                        : galleryImages[thumbsToShow]?.src || galleryImages[0].src
+                    }
                     alt="More photos"
                     fill
                     sizes="120px"
