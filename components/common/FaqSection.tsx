@@ -8,24 +8,75 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useQuery } from "@tanstack/react-query";
+
+interface FaqItem {
+  _id: string;
+  question: string;
+  answer: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface FaqResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+  data: FaqItem[];
+  responseTime: string;
+}
+
+// Fetch function
+const fetchFaqs = async (): Promise<FaqResponse> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/faq`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch FAQs");
+  }
+  return res.json();
+};
 
 export function FaqSection() {
-  const faqs = [
-    {
-      q: "What is Deal360?",
-      a: "Deal360 is a verified property platform connecting buyers, tenants, and investors with licensed RERA agents and exclusive property opportunities across the UAE. We focus on verified deals, not just listings.",
-    },
-    { q: "How do I verify an agent?", a: "You can verify an agent by checking their RERA license details on their profile and confirming verification badges on the platform." },
-    { q: "What is a “Below Market” deal?", a: "A “Below Market” deal is a property opportunity priced below the typical market rate for a similar property in the same area." },
-    { q: "How do private listings work?", a: "Private listings are shared with qualified buyers only. You can request access, and once approved, details become available." },
-    { q: "What is SmartLink?", a: "SmartLink is a shareable listing link that tracks engagement and helps agents manage leads efficiently." },
-    { q: "What is the Lead Unlock system?", a: "Lead Unlock lets agents access verified buyer leads after meeting certain criteria or using platform credits." },
-    { q: "How do I create a buyer requirement?", a: "Go to your dashboard, select Buyer Requirements, and submit your preferred location, budget, and property type." },
-    { q: "Are there fees for buyers?", a: "Basic browsing is free. Some premium features may require a subscription depending on your plan." },
-    { q: "How do I report a problem?", a: "Use the support form or email support with screenshots and details. Our team will respond quickly." },
-    { q: "What is Off-plan?", a: "Off-plan properties are purchased before construction is completed, often at early-bird pricing." },
-    { q: "How do I schedule a property viewing?", a: "Open a listing and click ‘Schedule Viewing’, choose a date/time, and confirm with the agent." },
-  ];
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["faqs"],
+    queryFn: fetchFaqs,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const faqs = data?.data || [];
+
+  // Skeleton Loader (matches your design)
+  const FaqSkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(6)].map((_, idx) => (
+        <div key={idx} className="py-2">
+          <div className="flex items-center justify-between py-4">
+            <div className="h-6 bg-gray-200 rounded w-4/5 animate-pulse" />
+            <div className="h-7 w-7 rounded-full border border-gray-300 animate-pulse" />
+          </div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mt-2 animate-pulse" />
+          <div className="h-4 bg-gray-200 rounded w-1/2 mt-1 animate-pulse" />
+        </div>
+      ))}
+    </div>
+  );
+
+  if (error) {
+    return (
+      <section className="py-16 md:py-24 bg-white">
+        <div className="mx-auto container px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#0B1C39]">
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-6 text-red-500">Failed to load FAQs. Please try again later.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 md:py-24 bg-white">
@@ -40,39 +91,49 @@ export function FaqSection() {
           </p>
         </div>
 
-        {/* Accordion */}
+        {/* Accordion with Loading State */}
         <Accordion type="single" collapsible className="w-full">
-          {faqs.map((item, idx) => (
-            <AccordionItem
-              key={idx}
-              value={`item-${idx}`}
-              className="border-b-0 py-2"
-            >
-              <AccordionTrigger
-                className="
-                  group flex w-full items-center
-                  py-4 text-left text-[18px] font-semibold text-[#1E1E1E]
-                  hover:no-underline [&>svg]:hidden
-                "
+          {isLoading ? (
+            <FaqSkeleton />
+          ) : (
+            faqs.map((item, idx) => (
+              <AccordionItem
+                key={item._id || idx}
+                value={`item-${idx}`}
+                className="border-b-0 py-2"
               >
-                <span>{item.q}</span>
-                <span
+                <AccordionTrigger
                   className="
-                    ml-4 grid h-7 w-7 place-items-center rounded-full
-                    border border-[#0B1C39] text-[#0B1C39]
+                    group flex w-full items-center
+                    py-4 text-left text-[18px] font-semibold text-[#1E1E1E]
+                    hover:no-underline [&>svg]:hidden
                   "
                 >
-                  <Plus className="h-4 w-4 group-data-[state=open]:hidden" />
-                  <Minus className="h-4 w-4 hidden group-data-[state=open]:block" />
-                </span>
-              </AccordionTrigger>
+                  <span>{item.question}</span>
+                  <span
+                    className="
+                      ml-4 grid h-7 w-7 place-items-center rounded-full
+                      border border-[#0B1C39] text-[#0B1C39]
+                    "
+                  >
+                    <Plus className="h-4 w-4 group-data-[state=open]:hidden" />
+                    <Minus className="h-4 w-4 hidden group-data-[state=open]:block" />
+                  </span>
+                </AccordionTrigger>
 
-              <AccordionContent className="pb-4 pr-10 text-base font-normal leading-6 text-[#7D7D7D]">
-                {item.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                <AccordionContent className="pb-4 pr-10 text-base font-normal leading-6 text-[#7D7D7D]">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))
+          )}
         </Accordion>
+
+        {!isLoading && faqs.length === 0 && (
+          <div className="text-center py-12 text-[#8A8A8A]">
+            No FAQs available at the moment.
+          </div>
+        )}
       </div>
     </section>
   );

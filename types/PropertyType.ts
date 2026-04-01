@@ -10,6 +10,7 @@ export interface Property {
   area: number;           // in sqm probably
   description: string;
   plot: number;
+  acres?: number;
   location: string;
   price: number;
   images: string[];

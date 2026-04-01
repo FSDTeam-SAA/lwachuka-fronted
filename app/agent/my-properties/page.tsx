@@ -78,6 +78,7 @@ export default function MyPropertiesPage() {
                 price={`KES ${property.price.toLocaleString()}`}
                 beds={property.bedrooms}
                 baths={property.bathrooms}
+                acres={property.acres}
                 status={property.listingType}
                 isAgentView={true}
               />

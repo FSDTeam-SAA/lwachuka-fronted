@@ -1,6 +1,54 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import axios from "axios";
 import api from "@/lib/api";
+
+type ApiErrorSource = {
+    message?: string;
+};
+
+type ApiErrorResponse = {
+    message?: string;
+    error?: string;
+    errorSources?: ApiErrorSource[];
+};
+
+const extractMessageFromApi = (data: unknown): string | null => {
+    if (!data) return null;
+    if (typeof data === "string") {
+        return data.trim() || null;
+    }
+
+    if (typeof data !== "object") return null;
+    const typed = data as ApiErrorResponse;
+
+    const sources = Array.isArray(typed.errorSources)
+        ? typed.errorSources
+              .map(source => (typeof source?.message === "string" ? source.message.trim() : ""))
+              .filter(Boolean)
+        : [];
+
+    if (sources.length > 0) return sources.join("||");
+    if (typeof typed.message === "string" && typed.message.trim()) return typed.message.trim();
+    if (typeof typed.error === "string" && typed.error.trim()) return typed.error.trim();
+
+    return null;
+};
+
+const getAuthErrorMessage = (error: unknown): string => {
+    if (axios.isAxiosError(error)) {
+        const apiMessage = extractMessageFromApi(error.response?.data);
+        if (apiMessage) return apiMessage;
+
+        if (error.code === "ERR_NETWORK") return "Unable to reach the server. Please try again.";
+        if (error.code === "ECONNABORTED") return "Request timed out. Please try again.";
+        if (error.response?.status === 401) return "Invalid email or password.";
+        if (error.message) return error.message;
+    }
+
+    if (error instanceof Error && error.message) return error.message;
+    return "Login failed";
+};
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -23,7 +71,7 @@ export const authOptions: NextAuthOptions = {
 
                     const data = res.data;
 
-                    if (data.success && data.data) {
+                    if (data?.success && data?.data) {
                         const { user, accessToken } = data.data;
                         return {
                             id: user._id,
@@ -36,9 +84,13 @@ export const authOptions: NextAuthOptions = {
                             accessToken: accessToken,
                         };
                     }
+                    const message = extractMessageFromApi(data);
+                    if (message) {
+                        throw new Error(message);
+                    }
                     return null;
                 } catch (error: unknown) {
-                    const message = error instanceof Error ? error.message : "Login failed";
+                    const message = getAuthErrorMessage(error);
                     console.error("Login failed:", message);
                     throw new Error(message);
                 }

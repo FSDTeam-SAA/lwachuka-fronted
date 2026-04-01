@@ -114,6 +114,7 @@ export default function SimilarProperties({
                       }
                       beds={p.bedrooms}
                       baths={p.bathrooms}
+                      acres={p.acres}
                       builtUpSqft={`${p.area} sqm`}
                       plotSqft={p.plot || 0}
                       tagline={p.description.slice(0, 60) + "..."}

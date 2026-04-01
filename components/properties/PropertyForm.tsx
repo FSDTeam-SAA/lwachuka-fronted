@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -28,36 +28,55 @@ import {
 import { PropertyImageUpload } from "./PropertyImageUpload";
 import { AmenitiesChecklist } from "./AmenitiesChecklist";
 
+const trimToUndefined = (val: unknown) => {
+    if (typeof val !== "string") return val;
+    const trimmed = val.trim();
+    return trimmed === "" ? undefined : trimmed;
+};
+
+const optionalString = z.preprocess(trimToUndefined, z.string().optional());
+const optionalNumber = z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    if (typeof val === "number" && Number.isNaN(val)) return undefined;
+    return val;
+}, z.number().optional());
+
+const optionalListingType = z.preprocess(
+    trimToUndefined,
+    z.enum(["For Sale", "For Rent"]).optional()
+);
+
 const schema = z.object({
-    title: z.string().min(1, "Title is required"),
-    listingType: z.enum(["For Sale", "For Rent"]),
-    propertyType: z.string().min(1, "Property type is required"),
-    bedrooms: z.number().min(0),
-    bathrooms: z.number().min(0),
-    area: z.number().min(1, "Area is required"),
-    description: z.string().optional(),
-    location: z.string().min(1, "Location is required"),
-    price: z.number().min(1, "Price is required"),
+    title: optionalString,
+    listingType: optionalListingType,
+    propertyType: optionalString,
+    bedrooms: optionalNumber,
+    bathrooms: optionalNumber,
+    area: optionalNumber,
+    description: optionalString,
+    location: optionalString,
+    price: optionalNumber,
     // Optional detailed fields
-    builtUp: z.number().optional(),
-    plot: z.number().optional(),
-    keyBedRooms: z.string().optional(),
-    keyBathrooms: z.string().optional(),
-    keyBuiltUp: z.number().optional(),
-    keyKitchenType: z.string().optional(),
-    keyParking: z.string().optional(),
-    keyFinishes: z.string().optional(),
-    keyBalconyType: z.string().optional(),
-    keyStorage: z.string().optional(),
-    keyCoolingSystem: z.string().optional(),
-    keyMoveInStatus: z.string().optional(),
-    purpose: z.string().optional(),
-    referenceNumber: z.string().optional(),
-    furnishing: z.string().optional(),
-    addedOn: z.string().optional(),
-    originalPrice: z.number().optional(),
-    handoverDate: z.string().optional(),
-});
+    builtUp: optionalNumber,
+    plot: optionalNumber,
+    acres: optionalNumber,
+    keyBedRooms: optionalString,
+    keyBathrooms: optionalString,
+    keyBuiltUp: optionalNumber,
+    keyKitchenType: optionalString,
+    keyParking: optionalString,
+    keyFinishes: optionalString,
+    keyBalconyType: optionalString,
+    keyStorage: optionalString,
+    keyCoolingSystem: optionalString,
+    keyMoveInStatus: optionalString,
+    purpose: optionalString,
+    referenceNumber: optionalString,
+    furnishing: optionalString,
+    addedOn: optionalString,
+    originalPrice: optionalNumber,
+    handoverDate: optionalString,
+}).partial();
 
 type FormValues = z.infer<typeof schema>;
 
@@ -77,13 +96,9 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
     const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(schema) as Resolver<FormValues>,
         defaultValues: {
             listingType: "For Sale",
-            bedrooms: 0,
-            bathrooms: 0,
-            area: 0,
-            price: 0,
         },
     });
 
@@ -103,6 +118,7 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 price: initialData.price,
                 builtUp: initialData.builtUp,
                 plot: initialData.plot,
+                acres: initialData.acres,
                 keyBedRooms: initialData.keyBedRooms,
                 keyBathrooms: initialData.keyBathrooms,
                 keyBuiltUp: initialData.keyBuiltUp,
@@ -150,8 +166,8 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
         // Sanitize numeric fields: handle NaN from valueAsNumber: true for empty optional fields
         const sanitizedData = { ...data };
         const numericFields: (keyof FormValues)[] = [
-            'bedrooms', 'bathrooms', 'area', 'price',
-            'builtUp', 'plot', 'keyBuiltUp', 'originalPrice'
+            "bedrooms", "bathrooms", "area", "price",
+            "builtUp", "plot", "acres", "keyBuiltUp", "originalPrice"
         ];
 
         numericFields.forEach(field => {
@@ -159,6 +175,16 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 delete sanitizedData[field];
             }
         });
+
+        const isLand = sanitizedData.propertyType === "Land";
+        if (isLand) {
+            delete sanitizedData.bedrooms;
+            delete sanitizedData.bathrooms;
+            delete sanitizedData.builtUp;
+            delete sanitizedData.plot;
+        } else {
+            delete sanitizedData.acres;
+        }
 
         const formDataObj: PropertyFormData = {
             ...sanitizedData,
@@ -181,6 +207,8 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
     };
 
     const isSubmitting = createMutation.isPending || updateMutation.isPending;
+    const selectedPropertyType = watch("propertyType");
+    const isLand = selectedPropertyType === "Land";
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 pb-20">
@@ -210,6 +238,7 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                                 <SelectItem value="Condo">Condo</SelectItem>
                                 <SelectItem value="Bungalow">Bungalow</SelectItem>
                                 <SelectItem value="Cottage">Cottage</SelectItem>
+                                <SelectItem value="Land">Land</SelectItem>
                             </SelectContent>
                         </Select>
                         {errors.propertyType && <p className="text-xs text-red-500">{errors.propertyType.message}</p>}
@@ -236,22 +265,31 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
                 <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="space-y-2">
-                        <Label>Bedrooms</Label>
-                        <Input type="number" {...register("bedrooms", { valueAsNumber: true })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Bathrooms</Label>
-                        <Input type="number" {...register("bathrooms", { valueAsNumber: true })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Built-up (sq ft)</Label>
-                        <Input type="number" {...register("builtUp", { valueAsNumber: true })} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Plot (sq ft)</Label>
-                        <Input type="number" {...register("plot", { valueAsNumber: true })} />
-                    </div>
+                    {isLand ? (
+                        <div className="space-y-2 md:col-span-4">
+                            <Label>Acres/Plot</Label>
+                            <Input type="number" {...register("acres", { valueAsNumber: true })} />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="space-y-2">
+                                <Label>Bedrooms</Label>
+                                <Input type="number" {...register("bedrooms", { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Bathrooms</Label>
+                                <Input type="number" {...register("bathrooms", { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Built-up (sq ft)</Label>
+                                <Input type="number" {...register("builtUp", { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Plot (sq ft)</Label>
+                                <Input type="number" {...register("plot", { valueAsNumber: true })} />
+                            </div>
+                        </>
+                    )}
                 </div>
                 <div className="space-y-2">
                     <Label>Description</Label>
@@ -366,7 +404,7 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                     </div>
                     {/* Technical Area for API consistency */}
                     <div className="space-y-2">
-                        <Label>Area (sq ft) - required for system</Label>
+                        <Label>Area (sq ft)</Label>
                         <Input type="number" {...register("area", { valueAsNumber: true })} />
                         {errors.area && <p className="text-xs text-red-500">{errors.area.message}</p>}
                     </div>

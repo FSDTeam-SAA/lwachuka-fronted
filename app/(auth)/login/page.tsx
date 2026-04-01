@@ -36,7 +36,7 @@ function LoginContent() {
         defaultValues: {
             email: "",
             password: "",
-            rememberMe: true, // Defaulting to true as requested
+            rememberMe: true, 
         },
     });
 
