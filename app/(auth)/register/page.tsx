@@ -9,6 +9,7 @@ import * as z from 'zod'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
+import axios from 'axios'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,13 +34,72 @@ const registerSchema = z
 
 type RegisterFormValues = z.infer<typeof registerSchema>
 
+type ApiErrorSource = {
+  message?: string
+}
+
+type ApiErrorResponse = {
+  message?: string
+  error?: string
+  errorSources?: ApiErrorSource[]
+}
+
+const extractMessagesFromApi = (data: unknown) => {
+  if (!data) return []
+  if (typeof data === 'string') {
+    const text = data.trim()
+    return text ? [text] : []
+  }
+  if (typeof data !== 'object') return []
+
+  const typed = data as ApiErrorResponse
+  const sources = Array.isArray(typed.errorSources)
+    ? typed.errorSources
+        .map(source =>
+          typeof source?.message === 'string' ? source.message.trim() : ''
+        )
+        .filter(Boolean)
+    : []
+
+  if (sources.length > 0) return sources
+  if (typeof typed.message === 'string' && typed.message.trim()) {
+    return [typed.message.trim()]
+  }
+  if (typeof typed.error === 'string' && typed.error.trim()) {
+    return [typed.error.trim()]
+  }
+
+  return []
+}
+
+const getRegisterErrors = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const apiMessages = extractMessagesFromApi(error.response?.data)
+    if (apiMessages.length > 0) return apiMessages
+
+    if (error.code === 'ERR_NETWORK') {
+      return ['Unable to reach the server. Please try again.']
+    }
+    if (error.code === 'ECONNABORTED') {
+      return ['Request timed out. Please try again.']
+    }
+    if (error.response?.status === 409) {
+      return ['This email is already registered. Please log in.']
+    }
+    if (error.message) return [error.message]
+  }
+
+  if (error instanceof Error && error.message) return [error.message]
+  return ['An unexpected error occurred. Please try again.']
+}
+
 export default function RegisterPage() {
   const router = useRouter()
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<string[]>([])
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -56,7 +116,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true)
-    setError('')
+    setErrors([])
 
     try {
       const res = await api.post('/auth/register', {
@@ -66,18 +126,22 @@ export default function RegisterPage() {
         role: data.role,
       })
 
-            if (res.data.success) {
-                router.push("/login?registered=true");
-            } else {
-                setError(res.data.message || "Registration failed");
-            }
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
-            setError(message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+      if (res.data?.success) {
+        router.push('/login?registered=true')
+      } else {
+        const apiMessages = extractMessagesFromApi(res.data)
+        setErrors(
+          apiMessages.length > 0
+            ? apiMessages
+            : ['Registration failed. Please try again.']
+        )
+      }
+    } catch (err) {
+      setErrors(getRegisterErrors(err))
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="w-full">
@@ -229,9 +293,17 @@ export default function RegisterPage() {
           )}
         </div>
 
-        {error && (
+        {errors.length > 0 && (
           <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-            {error}
+            {errors.length === 1 ? (
+              <p>{errors[0]}</p>
+            ) : (
+              <ul className="list-disc pl-5 space-y-1">
+                {errors.map((message, index) => (
+                  <li key={`${message}-${index}`}>{message}</li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 

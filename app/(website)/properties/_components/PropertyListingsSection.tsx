@@ -22,6 +22,7 @@ interface Property {
   images: string[];
   status: "approved" | "rejected" | "pending";
   description?: string;
+  acres?: number;
   // add more fields later if needed
 }
 
@@ -162,6 +163,7 @@ export function PropertyListingsSection() {
                   price={priceDisplay}
                   beds={property.bedrooms}
                   baths={property.bathrooms}
+                  acres={property.acres}
                   status={property.listingType} 
                   availability="Available"
                   builtUpSqft={`${property.area} sqm`}

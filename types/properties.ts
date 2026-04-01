@@ -20,6 +20,7 @@ export interface Property {
     // Optional fields
     builtUp?: number;
     plot?: number;
+    acres?: number;
     keyBedRooms?: string;
     keyBathrooms?: string;
     keyBuiltUp?: number;
@@ -42,18 +43,19 @@ export interface Property {
 }
 
 export interface PropertyFormData {
-    title: string;
-    listingType: ListingType;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    area: number;
+    title?: string;
+    listingType?: ListingType;
+    propertyType?: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    area?: number;
     description?: string;
-    location: string;
-    price: number;
+    location?: string;
+    price?: number;
     // Optional fields
     builtUp?: number;
     plot?: number;
+    acres?: number;
     keyBedRooms?: string;
     keyBathrooms?: string;
     keyBuiltUp?: number;

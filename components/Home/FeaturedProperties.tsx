@@ -80,6 +80,7 @@ export function FeaturedProperties() {
                 }
                 beds={property.bedrooms}
                 baths={property.bathrooms}
+                acres={property.acres}
                 builtUpSqft={`${property.area} sqm`} 
                 plotSqft={property?.plot || 0}
                 tagline={property.description.slice(0, 60) + "..."}

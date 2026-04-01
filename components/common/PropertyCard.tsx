@@ -16,6 +16,7 @@ interface PropertyCardProps {
   baths: number;
   builtUpSqft?: string;
   plotSqft?: number;
+  acres?: number;
   tagline?: string;
   status?: "For Sale" | "For Rent";
   availability?: string;
@@ -36,6 +37,7 @@ export function PropertyCard({
   baths,
   builtUpSqft = "1,976 sqft",
   plotSqft,
+  acres,
   tagline = "Genuine Resale | End Unit | Luxurious",
   status = "For Sale",
   availability = "Available",
@@ -65,8 +67,10 @@ export function PropertyCard({
     if (id) deleteMutation.mutate(id);
   };
 
+  const hasAcres = typeof acres === "number" && !Number.isNaN(acres);
+
   return (
-    <div className="w-full max-w-[520px] rounded-[28px] bg-[#EAEAEA] p-6 relative">
+    <div className="w-full max-w-[520px] rounded-[28px] bg-[#EAEAEA] p-6 relative flex h-full flex-col">
       {/* Image */}
       <div className="relative overflow-hidden rounded-[24px] border-2 border-[#0B2B4B]">
         <div className="relative h-[250px] w-full">
@@ -97,7 +101,7 @@ export function PropertyCard({
       </div>
 
       {/* Body */}
-      <div className="px-2 pt-5">
+      <div className="px-2 pt-5 flex flex-1 flex-col">
         <h3 className="text-[18px] font-medium text-[#2E353A]">{title}</h3>
 
         <div className="mt-2 flex items-center gap-2 text-[15px] font-medium text-[#7B7B7B]">
@@ -122,55 +126,73 @@ export function PropertyCard({
           {price}
         </div>
 
-        {/* Pills row 1 */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <Pill variant="active">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#0B2B4B]" />
-            <span className="ml-2">{availability}</span>
-          </Pill>
+        {hasAcres ? (
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Pill variant="active">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#0B2B4B]" />
+              <span className="ml-2">{availability}</span>
+            </Pill>
 
-          <Pill>
-            <Bed className="h-4 w-4 text-[#606A74]" />
-            <span className="ml-2">{beds} Beds</span>
-          </Pill>
+            <Pill>
+              <span className="text-[#606A74]">⧉</span>
+              <span className="ml-2">Acres/Plot: {acres}</span>
+            </Pill>
+          </div>
+        ) : (
+          <>
+            {/* Pills row 1 */}
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <Pill variant="active">
+                <span className="inline-block h-2 w-2 rounded-full bg-[#0B2B4B]" />
+                <span className="ml-2">{availability}</span>
+              </Pill>
 
-          <Pill>
-            <Bath className="h-4 w-4 text-[#606A74]" />
-            <span className="ml-2">{baths} Baths</span>
-          </Pill>
-        </div>
+              <Pill>
+                <Bed className="h-4 w-4 text-[#606A74]" />
+                <span className="ml-2">{beds} Beds</span>
+              </Pill>
 
-        {/* Pills row 2 */}
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Pill>
-            <span className="text-[#606A74]">⌗</span>
-            <span className="ml-2">Built-up: {builtUpSqft}</span>
-          </Pill>
+              <Pill>
+                <Bath className="h-4 w-4 text-[#606A74]" />
+                <span className="ml-2">{baths} Baths</span>
+              </Pill>
+            </div>
 
-          <Pill>
-            <span className="text-[#606A74]">⧉</span>
-            <span className="ml-2">Plot: {plotSqft}</span>
-          </Pill>
-        </div>
+            {/* Pills row 2 */}
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <Pill>
+                <span className="text-[#606A74]">⌗</span>
+                <span className="ml-2">Built-up: {builtUpSqft}</span>
+              </Pill>
+
+              <Pill>
+                <span className="text-[#606A74]">⧉</span>
+                <span className="ml-2">Plot: {plotSqft}</span>
+              </Pill>
+            </div>
+          </>
+        )}
 
         <p className="mt-4 text-[15px] font-medium text-[#2E353A] line-clamp-1">
           {tagline}
         </p>
-        {isAgentView ? (
-          <Button
-            onClick={() => router.push(`/agent/my-properties/edit/${id}`)}
-            className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90 flex items-center justify-center gap-2"
-          >
-            <Pencil className="h-4 w-4" />
-            Edit
-          </Button>
-        ) : (
-          <Link href={`/property-buy/${id}`}>
-            <Button className="mt-5 h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
-              View Details 
+        <div className="mt-auto pt-5">
+          {isAgentView ? (
+            <Button
+              onClick={() => router.push(`/agent/my-properties/edit/${id}`)}
+              className="h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90 flex items-center justify-center gap-2"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
             </Button>
-          </Link>
-        )}
+          ) : (
+            <Link href={`/property-buy/${id}`}>
+              <Button className="h-12 w-full rounded-full bg-[#0B2B4B] text-white hover:bg-[#0B2B4B]/90">
+                View Details 
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       <DeletePropertyModal
