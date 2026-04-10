@@ -159,11 +159,11 @@ export default function ChangePassword() {
   })
 
   return (
-    <div className="bg-[#f0f4f9] min-h-screen p-6">
-      <div className="flex gap-6 items-stretch">
+    <div className="bg-[#f0f4f9] min-h-screen p-3 sm:p-6">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-stretch">
 
         {/* Left Sidebar */}
-        <div className="w-60 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="w-full lg:w-60 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           {/* Cover */}
           <div className="h-24 bg-gradient-to-br from-slate-400 to-slate-600 shrink-0" />
 
@@ -247,14 +247,14 @@ export default function ChangePassword() {
         </div>
 
         {/* Right Form */}
-        <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-7 flex flex-col">
-          <h2 className="text-2xl font-bold text-[#1a2341]">Changes Password</h2>
+        <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-7 flex flex-col">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#1a2341]">Changes Password</h2>
           <p className="text-sm text-gray-400 mt-1 mb-7">
             Manage your account preferences, security settings, and privacy options.
           </p>
 
           {/* Current + New Password */}
-          <div className="grid grid-cols-2 gap-5 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
             <div className="flex flex-col gap-1.5">
               <Label className="text-sm font-medium text-[#1a2341]">Current Password</Label>
               <PasswordInput value={current} onChange={setCurrent} />
@@ -291,19 +291,19 @@ export default function ChangePassword() {
           </ul>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-4 mt-auto">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-auto">
             <Button
               variant="outline"
               onClick={handleDiscard}
               disabled={changePasswordMutation.isPending}
-              className="h-11 px-8 rounded-[8px] border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600 text-sm font-medium"
+              className="w-full sm:w-auto h-11 px-8 rounded-[8px] border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600 text-sm font-medium"
             >
               Discard Changes
             </Button>
             <Button
               onClick={() => changePasswordMutation.mutate()}
               disabled={!canSubmit || changePasswordMutation.isPending}
-              className="h-11 px-8 rounded-[8px] bg-[#1a2341] hover:bg-[#2a3451] text-white text-sm font-medium disabled:opacity-50"
+              className="w-full sm:w-auto h-11 px-8 rounded-[8px] bg-[#1a2341] hover:bg-[#2a3451] text-white text-sm font-medium disabled:opacity-50"
             >
               {changePasswordMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
