@@ -190,3 +190,26 @@ export function PropertyImageGallery({
     </section>
   );
 }
+
+export function PropertyImageGallerySkeleton() {
+  return (
+    <section className="w-full">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-2xl border border-[#EDEDED] bg-[#F4F6F8] shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+          <div className="relative h-[260px] sm:h-[380px] md:h-[480px] lg:h-[560px] xl:h-[550px]" />
+        </div>
+
+        <div className="mt-4 md:mt-5">
+          <div className="flex gap-2.5 overflow-hidden pb-3 sm:gap-3">
+            {Array.from({ length: 7 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="h-[72px] w-[120px] flex-shrink-0 rounded-xl bg-[#E5E5E5] animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

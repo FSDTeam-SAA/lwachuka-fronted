@@ -87,7 +87,21 @@ const formatBuiltUp = (value?: number | string) => {
 
 /* ---------------- COMPONENT ---------------- */
 
-export function PropertyExtrasSection({ property }: { property: Property }) {
+export function PropertyExtrasSection({
+  property,
+  isLoading,
+}: {
+  property?: Property;
+  isLoading?: boolean;
+}) {
+  if (isLoading) {
+    return <PropertyExtrasSectionSkeleton />;
+  }
+
+  if (!property) {
+    return null;
+  }
+
   const session = useSession();
   const islogin = session?.status;
   const bedroomsLabel = hasValue(property.keyBedRooms)
@@ -284,5 +298,89 @@ export function PropertyExtrasSection({ property }: { property: Property }) {
         </div>
       </div>
     </section>
+  );
+}
+
+export function PropertyExtrasSectionSkeleton() {
+  return (
+    <section className="bg-white py-14 md:py-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div>
+          <SkeletonLine className="h-8 w-72" />
+          <SkeletonLine className="mt-3 h-4 w-full max-w-xl" />
+
+          <div className="mt-6 grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
+            {Array.from({ length: 10 }).map((_, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <SkeletonCircle className="h-4 w-4" />
+                <SkeletonLine className="h-4 w-24" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-14">
+          <SkeletonLine className="h-8 w-80" />
+          <SkeletonLine className="mt-3 h-4 w-full max-w-xl" />
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            {Array.from({ length: 10 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="h-9 w-28 rounded-full bg-[#EDEDED] animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-16">
+          <SkeletonLine className="h-8 w-64" />
+
+          <div className="mt-6 overflow-hidden rounded-xl border border-[#EDEDED] bg-white">
+            <div className="hidden border-b border-[#EDEDED] bg-[#FAFAFA] text-xs font-semibold text-[#6F6F6F] md:grid md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="px-6 py-4">
+                  <SkeletonLine className="h-3 w-16" />
+                </div>
+              ))}
+            </div>
+
+            <div className="divide-y divide-[#F0F0F0]">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-1 gap-3 px-4 py-5 sm:px-6 md:grid-cols-4 md:gap-0"
+                >
+                  <SkeletonLine className="h-3 w-20" />
+                  <SkeletonLine className="h-4 w-28" />
+                  <SkeletonLine className="h-3 w-20" />
+                  <SkeletonLine className="h-4 w-28 md:ml-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <SkeletonLine className="h-10 w-40 rounded-md" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SkeletonLine({ className }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-[#EDEDED] ${className ?? ""}`}
+    />
+  );
+}
+
+function SkeletonCircle({ className }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse rounded-full bg-[#EDEDED] ${className ?? ""}`}
+    />
   );
 }

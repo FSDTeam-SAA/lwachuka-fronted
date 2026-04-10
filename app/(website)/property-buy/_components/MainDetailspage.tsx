@@ -2,10 +2,17 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { PropertyImageGallery } from "../_components/PropertyImageGallery";
-import { PropertyDetailsWithAgentCard } from "../_components/PropertyDetailsWithAgentCard";
+import {
+  PropertyImageGallery,
+  PropertyImageGallerySkeleton,
+} from "../_components/PropertyImageGallery";
+import {
+  PropertyDetailsWithAgentCard,
+  PropertyDetailsWithAgentCardSkeleton,
+} from "../_components/PropertyDetailsWithAgentCard";
 import { PropertyExtrasSection } from "../_components/PropertyExtrasSection";
 import SimilarProperties from "./SimilarProperies";
+import { SimilarPropertiesSkeleton } from "./SimilarProperies";
 import { Property, PropertySingleApiResponse } from "@/types/PropertyType";
 
 const fetchProperty = async (id: string): Promise<Property> => {
@@ -34,8 +41,11 @@ export default function MainDetailsPage({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <p className="text-lg">Loading property details...</p>
+      <div className="pb-12">
+        <PropertyImageGallerySkeleton />
+        <PropertyDetailsWithAgentCardSkeleton />
+        <PropertyExtrasSection isLoading />
+        <SimilarPropertiesSkeleton />
       </div>
     );
   }

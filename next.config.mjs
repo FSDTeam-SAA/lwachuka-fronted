@@ -9,10 +9,9 @@ const nextConfig = {
       },
     ],
 
-    // allow high quality images
-    qualities: [75, 90, 100],
+    formats: ["image/avif", "image/webp"], // better quality + smaller size
 
-
+    minimumCacheTTL: 60, // cache optimization
   },
 };
 

@@ -46,6 +46,30 @@ export default function SimilarProperties({
     gcTime: 10 * 60 * 1000,
   });
 
+  if (isLoading) {
+    return <SimilarPropertiesSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 md:py-16 bg-white">
+        <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0B1C39]">
+              Similar <span className="text-[#D3920E]">Properties</span>
+            </h2>
+            <p className="mt-3 text-sm md:text-base text-[#8A8A8A]">
+              Explore other carefully selected properties that match your preferences and lifestyle.
+            </p>
+          </div>
+          <div className="py-10 text-center text-red-600">
+            Failed to load similar properties. Please try again later.
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   const similarProperties = (data ?? [])
     .filter((property) => property._id !== currentPropertyId)
     .slice(0, 6);
@@ -65,15 +89,7 @@ export default function SimilarProperties({
 
         {/* Carousel */}
         <div className="relative">
-          {isLoading ? (
-            <div className="py-10 text-center text-gray-500">
-              Loading similar properties...
-            </div>
-          ) : error ? (
-            <div className="py-10 text-center text-red-600">
-              Failed to load similar properties. Please try again later.
-            </div>
-          ) : similarProperties.length === 0 ? (
+          {similarProperties.length === 0 ? (
             <div className="py-10 text-center text-gray-500">
               No similar properties available at the moment.
             </div>
@@ -129,5 +145,66 @@ export default function SimilarProperties({
         </div>
       </div>
     </section>
+  );
+}
+
+export function SimilarPropertiesSkeleton() {
+  return (
+    <section className="py-16 md:py-16 bg-white">
+      <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <SkeletonLine className="mx-auto h-8 w-60" />
+          <SkeletonLine className="mx-auto mt-3 h-4 w-full max-w-xl" />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="w-full max-w-[520px] rounded-[28px] bg-[#EAEAEA] p-6"
+            >
+              <div className="relative overflow-hidden rounded-[24px] border-2 border-[#0B2B4B]">
+                <div className="h-[250px] w-full bg-[#DCDCDC] animate-pulse" />
+              </div>
+
+              <div className="px-2 pt-5 flex flex-1 flex-col space-y-3">
+                <SkeletonLine className="h-5 w-3/4" />
+                <SkeletonLine className="h-4 w-2/3" />
+                <SkeletonLine className="h-7 w-1/2" />
+
+                <div className="grid grid-cols-3 gap-3">
+                  {Array.from({ length: 3 }).map((__, pillIdx) => (
+                    <div
+                      key={pillIdx}
+                      className="h-9 rounded-md bg-[#DCDCDC] animate-pulse"
+                    />
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 2 }).map((__, pillIdx) => (
+                    <div
+                      key={pillIdx}
+                      className="h-9 rounded-md bg-[#DCDCDC] animate-pulse"
+                    />
+                  ))}
+                </div>
+
+                <SkeletonLine className="h-4 w-3/4" />
+                <SkeletonLine className="h-12 w-full rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SkeletonLine({ className }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-[#EDEDED] ${className ?? ""}`}
+    />
   );
 }
