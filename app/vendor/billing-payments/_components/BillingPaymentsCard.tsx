@@ -98,7 +98,7 @@ function BillingPaymentsCard() {
         subtitle="Manage your subscription and payment methods"
       />
 
-      <div className="grid grid-cols-3 gap-4 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-3 sm:p-6">
         {stats.map((item, index) => (
           <Card key={index} className="rounded-2xl shadow-sm border">
             <CardContent className="p-5 space-y-3">

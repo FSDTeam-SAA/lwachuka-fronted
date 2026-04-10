@@ -190,17 +190,18 @@ export default function AddAdvrtisements() {
         title="Create New Advertisement"
         subtitle="Launch a new campaign to reach real estate professionals"
       />
-      <div className="mt-10">
+      <div className="mt-6 sm:mt-10">
         {/* Progress Bar */}
-        <div className="mb-8 max-w-6xl mx-auto">
-          <div className="flex items-center">
+        <div className="mb-8 max-w-6xl mx-auto px-2 sm:px-0">
+          <div className="overflow-x-auto pb-1">
+            <div className="flex items-center min-w-[700px] sm:min-w-0">
             {steps.map((s, index) => (
               <div key={s.id} className="flex items-center flex-1">
                 {/* Step Circle + Label */}
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center text-base font-bold transition-all",
+                      "w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-sm sm:text-base font-bold transition-all",
                       step >= s.id
                         ? "bg-primary text-primary-foreground"
                         : "bg-[#E9EAEB] text-muted-foreground",
@@ -210,7 +211,7 @@ export default function AddAdvrtisements() {
                   </div>
                   <span
                     className={cn(
-                      "mt-2 text-xs text-center whitespace-nowrap",
+                      "mt-2 text-[11px] sm:text-xs text-center whitespace-nowrap px-1",
                       step >= s.id
                         ? "text-primary font-medium"
                         : "text-muted-foreground",
@@ -223,7 +224,7 @@ export default function AddAdvrtisements() {
                 {/* Connector Line */}
                 {index < steps.length - 1 && (
                   <div
-                    className="flex-1 h-[2px] mx-3 self-start mt-6 transition-all"
+                    className="flex-1 h-[2px] mx-2 sm:mx-3 self-start mt-5 sm:mt-6 transition-all"
                     style={{
                       background:
                         step > s.id ? "hsl(var(--primary))" : "#E9EAEB",
@@ -232,10 +233,11 @@ export default function AddAdvrtisements() {
                 )}
               </div>
             ))}
+            </div>
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           <Card className="border-2 shadow-lg">
             <CardHeader>
               <CardTitle>
@@ -359,7 +361,7 @@ export default function AddAdvrtisements() {
 
                     {/* Image Preview Grid */}
                     {currentValues.media.length > 0 && (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                         {Array.from(currentValues.media).map(
                           (file: File, index: number) => (
                             <div
@@ -444,7 +446,7 @@ export default function AddAdvrtisements() {
                       <p className="text-sm text-muted-foreground mt-1 mb-3">
                         Select the regions where your ad will be shown
                       </p>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {[
                           "Nairobi",
                           "Nakuru",
@@ -508,7 +510,7 @@ export default function AddAdvrtisements() {
                       <p className="text-sm text-muted-foreground mt-1 mb-3">
                         Choose the audience groups you want to reach
                       </p>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {[
                           "Buyers",
                           "Families",
@@ -731,12 +733,12 @@ export default function AddAdvrtisements() {
                         ].map((item) => (
                           <div
                             key={item.label}
-                            className="flex items-center justify-between"
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3"
                           >
                             <span className="text-sm text-muted-foreground">
                               {item.label}
                             </span>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium break-all sm:text-right">
                               {item.value}
                             </span>
                           </div>
@@ -761,14 +763,19 @@ export default function AddAdvrtisements() {
               </form>
             </CardContent>
 
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={goBack} disabled={step === 1}>
+            <CardFooter className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-0 justify-between">
+              <Button
+                variant="outline"
+                onClick={goBack}
+                disabled={step === 1}
+                className="w-full sm:w-auto"
+              >
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
 
               {!isLastStep ? (
-                <Button onClick={goNext}>
+                <Button onClick={goNext} className="w-full sm:w-auto">
                   Continue
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -776,7 +783,7 @@ export default function AddAdvrtisements() {
                 <Button
                   onClick={handleSubmit(onSubmit)}
                   disabled={!isValid || addADVmutation.isPending}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
                 >
                   {addADVmutation.isPending ? "Publishing..." : "Publish Campaign"}
                 </Button>

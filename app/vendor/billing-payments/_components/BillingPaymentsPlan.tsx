@@ -156,19 +156,19 @@ function BillingPaymentsPlan() {
     payNumberMutation.isPending || callbackMutation.isPending;
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       <h2 className="text-lg font-semibold">Subscription Plans</h2>
       <p className="text-sm text-muted-foreground mb-8">
         Upgrade or downgrade your plan anytime
       </p>
 
-      <div className="grid grid-cols-3 gap-4 items-center py-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch py-4">
         {subscription?.map((plan: any, index: number) => (
           <Card
             key={plan._id}
             className={`relative rounded-2xl border transition-all ${
               index === 1
-                ? "bg-[#0F172A] border-[#0F172A] scale-105 shadow-xl z-10"
+                ? "bg-[#0F172A] border-[#0F172A] lg:scale-105 shadow-xl z-10"
                 : "bg-white border-gray-200 shadow-sm"
             }`}
           >
@@ -334,7 +334,7 @@ function BillingPaymentsPlan() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-1">
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
               <Button
                 variant="outline"
                 className="flex-1 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 h-[46px]"

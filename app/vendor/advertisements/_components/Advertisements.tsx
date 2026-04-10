@@ -87,7 +87,7 @@ export default function AdvertisementManagement() {
     <div>
       <Header title="Advertisements" subtitle="Review the advertising plans" />
 
-      <div className="p-6">
+      <div className="lg:p-6 py-6 px-2">
         <div className="flex items-center justify-end mb-6">
           <Link href="/vendor/advertisements/add-advertisement">
             <Button className="flex items-center gap-2">
