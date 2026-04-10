@@ -262,6 +262,76 @@ export function PropertyDetailsWithAgentCard({ property }: { property: Property 
   );
 }
 
+export function PropertyDetailsWithAgentCardSkeleton() {
+  return (
+    <section className="py-10 md:py-14 bg-white">
+      <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-[1.6fr_0.9fr] items-start">
+          <div>
+            <SkeletonLine className="h-9 w-52" />
+
+            <div className="mt-4 flex items-center gap-2">
+              <SkeletonCircle className="h-4 w-4" />
+              <SkeletonLine className="h-4 w-64" />
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="h-9 w-28 rounded-md bg-[#F0F0F0] animate-pulse"
+                />
+              ))}
+            </div>
+
+            <SkeletonLine className="mt-6 h-6 w-64" />
+
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <SkeletonLine key={idx} className="h-4 w-full" />
+              ))}
+            </div>
+
+            <div className="mt-6">
+              <SkeletonLine className="h-4 w-36" />
+              <div className="mt-3 space-y-2">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <SkeletonLine key={idx} className="h-4 w-full" />
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8 space-y-3">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <SkeletonLine key={idx} className="h-4 w-full" />
+              ))}
+            </div>
+          </div>
+
+          <aside className="lg:sticky lg:top-6 w-full lg:max-w-[400px] lg:justify-self-end mx-auto lg:mx-0">
+            <div className="rounded-2xl border border-[#EDEDED] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] overflow-hidden">
+              <div className="p-6 sm:p-7">
+                <div className="flex flex-col items-center text-center">
+                  <div className="h-[160px] w-[160px] sm:h-[180px] sm:w-[180px] md:h-[200px] md:w-[200px] rounded-full bg-[#E5E5E5] animate-pulse" />
+                  <SkeletonLine className="mt-5 h-6 w-40" />
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <SkeletonLine key={idx} className="h-4 w-full" />
+                  ))}
+                </div>
+
+                <SkeletonLine className="mt-6 h-11 w-full rounded-md" />
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- UI HELPERS ---------------- */
 
 function Pill({
@@ -297,5 +367,21 @@ function Row({
       <span className="font-bold text-[#1E1E1E]">{label}:</span>{" "}
       <span className="text-[#1E1E1E]">{children}</span>
     </p>
+  );
+}
+
+function SkeletonLine({ className }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-[#EDEDED] ${className ?? ""}`}
+    />
+  );
+}
+
+function SkeletonCircle({ className }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse rounded-full bg-[#EDEDED] ${className ?? ""}`}
+    />
   );
 }

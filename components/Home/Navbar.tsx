@@ -22,10 +22,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog';
 import Image from 'next/image';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
@@ -58,6 +68,12 @@ export function Navbar() {
       : user?.role === 'vendor'
         ? '/vendor/advertisements'
         : '/user/dashboard';
+
+  const openLogoutDialog = () => setIsLogoutDialogOpen(true);
+  const handleConfirmLogout = async () => {
+    setIsLogoutDialogOpen(false);
+    await signOut({ callbackUrl: '/' });
+  };
 
   const AuthSection = ({ mobile = false }: { mobile?: boolean }) => {
     if (status === 'loading') return null;
@@ -106,7 +122,10 @@ export function Navbar() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onSelect={(event) => {
+                event.preventDefault();
+                openLogoutDialog();
+              }}
               className="text-red-600 focus:text-red-600 cursor-pointer"
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -201,6 +220,24 @@ export function Navbar() {
           </Sheet>
         </div>
       </div>
+      <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+        <DialogContent className="sm:max-w-md ">
+          <DialogHeader>
+            <DialogTitle>Confirm logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to log out of your account?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleConfirmLogout}>
+              Log out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
