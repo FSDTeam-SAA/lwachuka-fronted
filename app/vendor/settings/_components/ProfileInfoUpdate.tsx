@@ -143,10 +143,10 @@ export default function ProfileInfoUpdate() {
   const fullName = `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
 
   return (
-    <div className="bg-[#f0f4f9] min-h-screen p-6">
-      <div className="flex gap-6 items-stretch">
+    <div className="bg-[#f0f4f9] min-h-screen p-3 sm:p-6">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-stretch">
         {/* Left Sidebar */}
-        <div className="w-60 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="w-full lg:w-60 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           {/* Cover */}
           <div className="h-24 bg-gradient-to-br from-slate-400 to-slate-600 shrink-0" />
 
@@ -232,8 +232,8 @@ export default function ProfileInfoUpdate() {
         </div>
 
         {/* Right Form */}
-        <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-7 flex flex-col">
-          <h2 className="text-2xl font-bold text-[#1a2341]">
+        <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-7 flex flex-col">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#1a2341]">
             Personal Information
           </h2>
           <p className="text-sm text-gray-400 mt-1 mb-5">
@@ -242,7 +242,7 @@ export default function ProfileInfoUpdate() {
 
           <div className="flex-1 flex flex-col">
             {/* Gender */}
-            <div className="flex items-center gap-6 mb-6">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-6">
               <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                 <input
                   type="radio"
@@ -266,7 +266,7 @@ export default function ProfileInfoUpdate() {
             </div>
 
             {/* First + Last Name */}
-            <div className="grid grid-cols-2 gap-5 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-medium text-[#1a2341]">
                   First Name
@@ -292,7 +292,7 @@ export default function ProfileInfoUpdate() {
             </div>
 
             {/* Email + Phone */}
-            <div className="grid grid-cols-2 gap-5 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-medium text-[#1a2341]">
                   Email Address
@@ -341,7 +341,7 @@ export default function ProfileInfoUpdate() {
             </div>
 
             {/* Location + Postal Code */}
-            <div className="grid grid-cols-2 gap-5 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-medium text-[#1a2341]">
                   Location
@@ -365,19 +365,19 @@ export default function ProfileInfoUpdate() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-4 mt-auto">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-auto">
               <Button
                 variant="outline"
                 onClick={handleDiscard}
                 disabled={updateUserMutation.isPending}
-                className="h-11 px-8 rounded-[8px] border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600 text-sm font-medium"
+                className="w-full sm:w-auto h-11 px-8 rounded-[8px] border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600 text-sm font-medium"
               >
                 Discard Changes
               </Button>
               <Button
                 onClick={() => updateUserMutation.mutate()}
                 disabled={updateUserMutation.isPending}
-                className="h-11 px-8 rounded-[8px] bg-[#1a2341] hover:bg-[#2a3451] text-white text-sm font-medium"
+                className="w-full sm:w-auto h-11 px-8 rounded-[8px] bg-[#1a2341] hover:bg-[#2a3451] text-white text-sm font-medium"
               >
                 {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
               </Button>
