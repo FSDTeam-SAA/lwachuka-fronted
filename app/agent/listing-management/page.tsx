@@ -30,10 +30,13 @@ export default function ListingManagementPage() {
         subtitle="View all your approved listings"
       />
 
-      <div className="p-8 max-w-full mx-auto">
-
+      <div className="p-4 sm:p-6 lg:p-8 max-w-full mx-auto">
         {/* Table Component */}
-        <ListingTable data={data?.data} isLoading={isLoading} />
+        <div className="-mx-4 sm:mx-0 overflow-x-auto">
+          <div className="min-w-[720px] px-4 sm:px-0">
+            <ListingTable data={data?.data} isLoading={isLoading} />
+          </div>
+        </div>
 
         {/* Pagination Component */}
         {!isLoading && totalItems > 0 && (

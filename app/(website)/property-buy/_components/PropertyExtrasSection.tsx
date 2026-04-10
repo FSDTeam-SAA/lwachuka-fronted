@@ -94,6 +94,9 @@ export function PropertyExtrasSection({
   property?: Property;
   isLoading?: boolean;
 }) {
+  const session = useSession();
+  const islogin = session?.status;
+
   if (isLoading) {
     return <PropertyExtrasSectionSkeleton />;
   }
@@ -101,9 +104,6 @@ export function PropertyExtrasSection({
   if (!property) {
     return null;
   }
-
-  const session = useSession();
-  const islogin = session?.status;
   const bedroomsLabel = hasValue(property.keyBedRooms)
     ? `Bedrooms: ${property.keyBedRooms}`
     : property.bedrooms != null
