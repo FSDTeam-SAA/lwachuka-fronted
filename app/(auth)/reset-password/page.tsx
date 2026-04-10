@@ -25,7 +25,6 @@ function ResetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get("email") || "";
-    const code = searchParams.get("code") || "";
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -43,10 +42,9 @@ function ResetPasswordContent() {
         setError("");
 
         try {
-            const res = await api.post("/auth/reset-password", {
+            const res = await api.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/reset-password`, {
                 email,
-                code,
-                password: data.password // Assuming the backend takes 'password' for the new password
+                newPassword: data.password
             });
 
             if (res.data.success || res.status === 200) {

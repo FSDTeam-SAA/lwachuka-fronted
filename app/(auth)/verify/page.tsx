@@ -11,7 +11,8 @@ function VerifyOtpContent() {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
 
-    const [otp, setOtp] = useState(["", "", "", ""]);
+    const OTP_LENGTH = 6;
+    const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -24,14 +25,14 @@ function VerifyOtpContent() {
 
         if (value.length > 1) {
             // Handle paste over multiple fields
-            const pastedData = value.substring(0, 4).split("");
+            const pastedData = value.substring(0, OTP_LENGTH).split("");
             const newOtp = [...otp];
             pastedData.forEach((char, i) => {
-                if (index + i < 4) newOtp[index + i] = char;
+                if (index + i < OTP_LENGTH) newOtp[index + i] = char;
             });
             setOtp(newOtp);
             // Focus the right-most filled input
-            const nextFocus = Math.min(index + pastedData.length, 3);
+            const nextFocus = Math.min(index + pastedData.length, OTP_LENGTH - 1);
             inputRefs.current[nextFocus]?.focus();
             return;
         }
@@ -41,7 +42,7 @@ function VerifyOtpContent() {
         setOtp(newOtp);
 
         // move to next input if filled
-        if (value && index < 3) {
+        if (value && index < OTP_LENGTH - 1) {
             inputRefs.current[index + 1]?.focus();
         }
     };
@@ -55,6 +56,23 @@ function VerifyOtpContent() {
         }
     };
 
+    const handlePaste = (index: number, e: React.ClipboardEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData("text");
+        if (!text) return;
+        const digits = text.replace(/\D/g, "").slice(0, OTP_LENGTH);
+        if (!digits) return;
+
+        const newOtp = [...otp];
+        digits.split("").forEach((char, i) => {
+            if (index + i < OTP_LENGTH) newOtp[index + i] = char;
+        });
+        setOtp(newOtp);
+
+        const nextFocus = Math.min(index + digits.length, OTP_LENGTH - 1);
+        inputRefs.current[nextFocus]?.focus();
+    };
+
     // Timer logic
     useEffect(() => {
         if (timer > 0) {
@@ -65,8 +83,8 @@ function VerifyOtpContent() {
 
     const handleVerify = async () => {
         const fullOtp = otp.join("");
-        if (fullOtp.length < 4) {
-            setError("Please enter the complete 4-digit OTP.");
+        if (fullOtp.length < OTP_LENGTH) {
+            setError(`Please enter the complete ${OTP_LENGTH}-digit OTP.`);
             return;
         }
 
@@ -74,7 +92,7 @@ function VerifyOtpContent() {
         setError("");
 
         try {
-            const res = await api.post("/auth/verify", {
+            const res = await api.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/verify`, {
                 email,
                 otp: fullOtp
             });
@@ -126,9 +144,10 @@ function VerifyOtpContent() {
                             ref={(el) => { inputRefs.current[index] = el; }}
                             type="text"
                             inputMode="numeric"
-                            maxLength={4}
+                            maxLength={1}
                             value={digit}
                             onChange={(e) => handleChange(index, e.target.value)}
+                            onPaste={(e) => handlePaste(index, e)}
                             onKeyDown={(e) => handleKeyDown(index, e)}
                             className="w-16 h-16 text-center text-2xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B2341] focus:border-transparent transition-all bg-white"
                         />
@@ -163,7 +182,7 @@ function VerifyOtpContent() {
 
                 <Button
                     onClick={handleVerify}
-                    disabled={isLoading || otp.join("").length < 4}
+                    disabled={isLoading || otp.join("").length < OTP_LENGTH}
                     className="w-full bg-[#0B2341] hover:bg-[#0B2341]/90 text-white rounded-full py-6 text-base"
                 >
                     {isLoading ? <Loader2 className="animate-spin mr-2" /> : null}
