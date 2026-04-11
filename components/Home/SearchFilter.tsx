@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import type { PropertyApiResponse } from '@/types/PropertyType';
 
@@ -48,6 +55,13 @@ type SearchFilterValues = {
   type?: string;
   location?: string;
   price?: string;
+  bedrooms?: string | number;
+  bathrooms?: string | number;
+  minLand?: string | number;
+  maxLand?: string | number;
+  parking?: string | boolean;
+  gatedCommunity?: string | boolean;
+  staffQuarters?: string | boolean;
 };
 
 type SearchFilterProps = {
@@ -67,6 +81,13 @@ export function SearchFilter({
   const [lookingFor, setLookingFor] = useState('');
   const [location, setLocation] = useState('');
   const [price, setPrice] = useState('');
+  const [bedrooms, setBedrooms] = useState('');
+  const [bathrooms, setBathrooms] = useState('');
+  const [minLand, setMinLand] = useState('');
+  const [maxLand, setMaxLand] = useState('');
+  const [parking, setParking] = useState('any');
+  const [gatedCommunity, setGatedCommunity] = useState('any');
+  const [staffQuarters, setStaffQuarters] = useState('any');
   const [hasUserSelectedType, setHasUserSelectedType] = useState(false);
 
   const initialListingType = (initialValues?.listingType ?? '').toString();
@@ -75,6 +96,13 @@ export function SearchFilter({
   const initialLocation = (initialValues?.location ?? '').toString();
   const initialPrice = (initialValues?.price ?? '').toString();
   const initialPropertyType = (initialValues?.propertyType ?? '').toString();
+  const initialBedrooms = (initialValues?.bedrooms ?? '').toString();
+  const initialBathrooms = (initialValues?.bathrooms ?? '').toString();
+  const initialMinLand = (initialValues?.minLand ?? '').toString();
+  const initialMaxLand = (initialValues?.maxLand ?? '').toString();
+  const initialParking = (initialValues?.parking ?? '').toString();
+  const initialGatedCommunity = (initialValues?.gatedCommunity ?? '').toString();
+  const initialStaffQuarters = (initialValues?.staffQuarters ?? '').toString();
 
   const {
     data: propertyTypesData,
@@ -93,7 +121,22 @@ export function SearchFilter({
   );
 
   useEffect(() => {
-    if (!initialListingType && !initialTransaction && !initialType && !initialLocation && !initialPrice) {
+    const hasInitialValues = [
+      initialListingType,
+      initialTransaction,
+      initialType,
+      initialLocation,
+      initialPrice,
+      initialBedrooms,
+      initialBathrooms,
+      initialMinLand,
+      initialMaxLand,
+      initialParking,
+      initialGatedCommunity,
+      initialStaffQuarters,
+    ].some((value) => value);
+
+    if (!hasInitialValues) {
       return;
     }
 
@@ -107,12 +150,38 @@ export function SearchFilter({
     setLookingFor(initialType);
     setLocation(initialLocation);
     setPrice(initialPrice);
+    setBedrooms(initialBedrooms);
+    setBathrooms(initialBathrooms);
+    setMinLand(initialMinLand);
+    setMaxLand(initialMaxLand);
+    setParking(
+      initialParking === 'true' || initialParking === 'false'
+        ? initialParking
+        : 'any'
+    );
+    setGatedCommunity(
+      initialGatedCommunity === 'true' || initialGatedCommunity === 'false'
+        ? initialGatedCommunity
+        : 'any'
+    );
+    setStaffQuarters(
+      initialStaffQuarters === 'true' || initialStaffQuarters === 'false'
+        ? initialStaffQuarters
+        : 'any'
+    );
   }, [
     initialListingType,
     initialTransaction,
     initialType,
     initialLocation,
     initialPrice,
+    initialBedrooms,
+    initialBathrooms,
+    initialMinLand,
+    initialMaxLand,
+    initialParking,
+    initialGatedCommunity,
+    initialStaffQuarters,
   ]);
 
   useEffect(() => {
@@ -132,22 +201,53 @@ export function SearchFilter({
     lookingFor?: string;
     location?: string;
     price?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+    minLand?: string;
+    maxLand?: string;
+    parking?: string;
+    gatedCommunity?: string;
+    staffQuarters?: string;
   }) => {
     const selectedListingType = overrides?.listingType ?? listingType;
     const selectedPropertyType = overrides?.propertyType ?? propertyType;
     const selectedLookingFor = overrides?.lookingFor ?? lookingFor;
     const selectedLocation = overrides?.location ?? location;
     const selectedPrice = overrides?.price ?? price;
+    const selectedBedrooms = overrides?.bedrooms ?? bedrooms;
+    const selectedBathrooms = overrides?.bathrooms ?? bathrooms;
+    const selectedMinLand = overrides?.minLand ?? minLand;
+    const selectedMaxLand = overrides?.maxLand ?? maxLand;
+    const selectedParking = overrides?.parking ?? parking;
+    const selectedGatedCommunity = overrides?.gatedCommunity ?? gatedCommunity;
+    const selectedStaffQuarters = overrides?.staffQuarters ?? staffQuarters;
 
     const params = new URLSearchParams();
 
     const looking = selectedLookingFor.trim();
     const place = selectedLocation.trim();
     const priceValue = selectedPrice.trim();
+    const bedroomsValue = selectedBedrooms.trim();
+    const bathroomsValue = selectedBathrooms.trim();
+    const minLandValue = selectedMinLand.trim();
+    const maxLandValue = selectedMaxLand.trim();
 
     if (looking) params.set('type', looking);
     if (place) params.set('location', place);
     if (priceValue) params.set('price', priceValue);
+    if (bedroomsValue) params.set('bedrooms', bedroomsValue);
+    if (bathroomsValue) params.set('bathrooms', bathroomsValue);
+    if (minLandValue) params.set('minLand', minLandValue);
+    if (maxLandValue) params.set('maxLand', maxLandValue);
+    if (selectedParking === 'true' || selectedParking === 'false') {
+      params.set('parking', selectedParking);
+    }
+    if (selectedGatedCommunity === 'true' || selectedGatedCommunity === 'false') {
+      params.set('gatedCommunity', selectedGatedCommunity);
+    }
+    if (selectedStaffQuarters === 'true' || selectedStaffQuarters === 'false') {
+      params.set('staffQuarters', selectedStaffQuarters);
+    }
 
     params.set(
       'listingType',
@@ -166,7 +266,7 @@ export function SearchFilter({
     <section>
       <div className="mx-auto container px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-[#E5E5E5] bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)] md:p-8">
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
             {/* Looking For */}
             <div>
               <label className="block text-sm font-semibold text-[#1E1E1E]">
@@ -220,11 +320,11 @@ export function SearchFilter({
             {/* Price */}
             <div>
               <label className="block text-sm font-semibold text-[#1E1E1E]">
-                Price
+                Min Price
               </label>
               <div className="relative mt-2">
                 <Input
-                  placeholder="Price"
+                  placeholder="Min Price"
                   className="h-11 rounded-xl border-[#D6D6D6] bg-white pl-10 placeholder:text-[#7D7D7D]"
                   value={price}
                   onChange={(event) => setPrice(event.target.value)}
@@ -242,6 +342,131 @@ export function SearchFilter({
                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
+              </div>
+            </div>
+
+            {/* Bedrooms */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Bedrooms
+              </label>
+              <div className="mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Bedrooms"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={bedrooms}
+                  onChange={(event) => setBedrooms(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Bathrooms */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Bathrooms
+              </label>
+              <div className="mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Bathrooms"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={bathrooms}
+                  onChange={(event) => setBathrooms(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Land Size (Min) */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Land Size (Min)
+              </label>
+              <div className="mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Min land area"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={minLand}
+                  onChange={(event) => setMinLand(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Land Size (Max) */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Land Size (Max)
+              </label>
+              <div className="mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Max land area"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={maxLand}
+                  onChange={(event) => setMaxLand(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Parking */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Parking
+              </label>
+              <div className="mt-2">
+                <Select value={parking} onValueChange={setParking}>
+                  <SelectTrigger className="h-11 rounded-xl border-[#D6D6D6] bg-white">
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Gated Community */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Gated Community
+              </label>
+              <div className="mt-2">
+                <Select value={gatedCommunity} onValueChange={setGatedCommunity}>
+                  <SelectTrigger className="h-11 rounded-xl border-[#D6D6D6] bg-white">
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Staff Quarters */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Staff Quarters
+              </label>
+              <div className="mt-2">
+                <Select value={staffQuarters} onValueChange={setStaffQuarters}>
+                  <SelectTrigger className="h-11 rounded-xl border-[#D6D6D6] bg-white">
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
