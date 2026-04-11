@@ -453,7 +453,10 @@ export default function ResultsClient() {
   };
 
   const initialValues = {
-    type: searchParams.get("type") || "",
+    searchTerm: searchParams.get("searchTerm") || searchParams.get("type") || "",
+    title: searchParams.get("title") || "",
+    purpose: searchParams.get("purpose") || "",
+    referenceNumber: searchParams.get("referenceNumber") || "",
     location: searchParams.get("location") || "",
     price: searchParams.get("price") || "",
     bedrooms: searchParams.get("bedrooms") || "",
@@ -471,7 +474,11 @@ export default function ResultsClient() {
   const buildQueryString = (includeLocation: boolean) => {
     const query = new URLSearchParams();
 
-    const searchTerm = searchParams.get("type");
+    const searchTerm =
+      searchParams.get("searchTerm") || searchParams.get("type");
+    const title = searchParams.get("title");
+    const purpose = searchParams.get("purpose");
+    const referenceNumber = searchParams.get("referenceNumber");
     const location = searchParams.get("location");
     const price = searchParams.get("price");
     const bedrooms = searchParams.get("bedrooms");
@@ -486,6 +493,10 @@ export default function ResultsClient() {
     const transaction = searchParams.get("transaction");
 
     if (searchTerm) query.set("searchTerm", searchTerm);
+    if (title) query.set("title", title);
+    if (purpose) query.set("purpose", purpose);
+    if (referenceNumber) query.set("referenceNumber", referenceNumber);
+    query.set("status", "approved");
     if (includeLocation && location) query.set("location", location);
     if (price) query.set("price", price);
     if (bedrooms) query.set("bedrooms", bedrooms);
@@ -521,7 +532,6 @@ export default function ResultsClient() {
       }
     }
 
-    query.set("status", "approved");
     return query.toString();
   };
 
