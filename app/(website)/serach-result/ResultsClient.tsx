@@ -456,6 +456,13 @@ export default function ResultsClient() {
     type: searchParams.get("type") || "",
     location: searchParams.get("location") || "",
     price: searchParams.get("price") || "",
+    bedrooms: searchParams.get("bedrooms") || "",
+    bathrooms: searchParams.get("bathrooms") || "",
+    minLand: searchParams.get("minLand") || "",
+    maxLand: searchParams.get("maxLand") || "",
+    parking: searchParams.get("parking") || "",
+    gatedCommunity: searchParams.get("gatedCommunity") || "",
+    staffQuarters: searchParams.get("staffQuarters") || "",
     transaction: searchParams.get("transaction") || "",
     listingType: searchParams.get("listingType") || "",
     propertyType: searchParams.get("propertyType") || "all",
@@ -467,6 +474,13 @@ export default function ResultsClient() {
     const searchTerm = searchParams.get("type");
     const location = searchParams.get("location");
     const price = searchParams.get("price");
+    const bedrooms = searchParams.get("bedrooms");
+    const bathrooms = searchParams.get("bathrooms");
+    const minLand = searchParams.get("minLand");
+    const maxLand = searchParams.get("maxLand");
+    const parking = searchParams.get("parking");
+    const gatedCommunity = searchParams.get("gatedCommunity");
+    const staffQuarters = searchParams.get("staffQuarters");
     const propertyType = searchParams.get("propertyType");
     const listingTypeParam = searchParams.get("listingType");
     const transaction = searchParams.get("transaction");
@@ -474,6 +488,19 @@ export default function ResultsClient() {
     if (searchTerm) query.set("searchTerm", searchTerm);
     if (includeLocation && location) query.set("location", location);
     if (price) query.set("price", price);
+    if (bedrooms) query.set("bedrooms", bedrooms);
+    if (bathrooms) query.set("bathrooms", bathrooms);
+    if (minLand) query.set("minLand", minLand);
+    if (maxLand) query.set("maxLand", maxLand);
+    if (parking === "true" || parking === "false") {
+      query.set("parking", parking);
+    }
+    if (gatedCommunity === "true" || gatedCommunity === "false") {
+      query.set("gatedCommunity", gatedCommunity);
+    }
+    if (staffQuarters === "true" || staffQuarters === "false") {
+      query.set("staffQuarters", staffQuarters);
+    }
     if (propertyType && propertyType.toLowerCase() !== "all") {
       query.set("propertyType", propertyType);
     }

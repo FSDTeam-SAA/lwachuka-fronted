@@ -72,12 +72,12 @@ export default function MyPropertiesPage() {
               <PropertyCard
                 key={property._id}
                 id={property._id}
-                image={property.images[0] || '/images/placeholder-property.jpg'}
+                image={property.images?.[0] ?? '/placeholder-property.jpg'}
                 title={property.title}
                 location={property.location}
                 price={`KES ${property.price.toLocaleString()}`}
-                beds={property.bedrooms}
-                baths={property.bathrooms}
+                beds={property.bedrooms || 0}
+                baths={property.bathrooms || 0}
                 acres={property.acres}
                 status={property.listingType}
                 isAgentView={true}

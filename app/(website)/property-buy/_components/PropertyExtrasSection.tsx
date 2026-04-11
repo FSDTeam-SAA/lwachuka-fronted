@@ -44,6 +44,11 @@ const formatAreaValue = (value?: number) => {
   return `${value.toLocaleString()} sqm`;
 };
 
+const formatAreaDisplay = (value?: number) => {
+  if (value == null) return "N/A";
+  return `${value.toLocaleString()} sqm`;
+};
+
 const formatDate = (value?: string) => {
   if (!value) return "N/A";
   const date = new Date(value);
@@ -74,6 +79,12 @@ const hasValue = (value: unknown) => {
   if (value == null) return false;
   if (typeof value === "string") return value.trim().length > 0;
   return true;
+};
+
+const formatText = (value?: string | number) => {
+  if (value == null) return "N/A";
+  if (typeof value === "string") return value.trim() ? value : "N/A";
+  return value.toLocaleString();
 };
 
 const formatKeyLabel = (label: string, value?: string) =>
@@ -144,32 +155,69 @@ export function PropertyExtrasSection({
     label,
   }));
 
-  const infoRows = [
+  const detailItems: Array<{
+    label: string;
+    value: string;
+    isFullWidth?: boolean;
+  }> = [
+    { label: "Property ID", value: formatText(property._id) },
+    { label: "Title", value: formatText(property.title) },
+    { label: "Listing type", value: formatText(property.listingType) },
+    { label: "Property type", value: formatText(property.propertyType) },
+    { label: "Purpose", value: formatText(property.purpose || property.listingType) },
+    { label: "Status", value: formatText(property.status) },
+    { label: "Reference no.", value: formatText(property.referenceNumber) },
+    { label: "Price", value: formatPrice(property.price, property.listingType) },
     {
-      leftLabel: "Type",
-      leftValue: property.propertyType || "N/A",
-      rightLabel: "Added on",
-      rightValue: formatDate(property.addedOn || property.createdAt),
+      label: "Original price",
+      value: formatPrice(property.originalPrice, property.listingType),
     },
+    { label: "Bedrooms", value: formatText(property.bedrooms) },
+    { label: "Bathrooms", value: formatText(property.bathrooms) },
+    { label: "Area", value: formatAreaDisplay(property.area) },
+    { label: "Built-up", value: formatAreaDisplay(property.builtUp) },
+    { label: "Plot", value: formatAreaDisplay(property.plot) },
+    { label: "Acres", value: formatText(property.acres) },
+    { label: "Key bedrooms", value: formatText(property.keyBedRooms) },
+    { label: "Key bathrooms", value: formatText(property.keyBathrooms) },
+    { label: "Key built-up", value: formatBuiltUp(property.keyBuiltUp) ?? "N/A" },
+    { label: "Kitchen type", value: formatText(property.keyKitchenType) },
+    { label: "Parking", value: formatText(property.keyParking) },
+    { label: "Finishes", value: formatText(property.keyFinishes) },
+    { label: "Balcony type", value: formatText(property.keyBalconyType) },
+    { label: "Storage", value: formatText(property.keyStorage) },
+    { label: "Cooling system", value: formatText(property.keyCoolingSystem) },
+    { label: "Move-in status", value: formatText(property.keyMoveInStatus) },
+    { label: "Furnishing", value: formatText(property.furnishing) },
+    { label: "Location", value: formatText(property.location) },
+    { label: "Added on", value: formatDate(property.addedOn || property.createdAt) },
+    { label: "Handover date", value: formatDate(property.handoverDate) },
+    { label: "Created at", value: formatDate(property.createdAt) },
+    { label: "Updated at", value: formatDate(property.updatedAt) },
+    { label: "Version", value: formatText(property.__v) },
     {
-      leftLabel: "Purpose",
-      leftValue: property.purpose || property.listingType || "N/A",
-      rightLabel: "Original price",
-      rightValue: formatPrice(property.originalPrice, property.listingType),
-    },
-    {
-      leftLabel: "Reference no.",
-      leftValue: property.referenceNumber || "N/A",
-      rightLabel: "Handover date",
-      rightValue: formatDate(property.handoverDate),
-    },
-    {
-      leftLabel: "Furnishing",
-      leftValue: property.furnishing || "N/A",
-      rightLabel: "Completion",
-      rightValue: property.keyMoveInStatus || "N/A",
+      label: "Description",
+      value: formatText(property.description),
+      isFullWidth: true,
     },
   ];
+
+  const compactItems = detailItems.filter((item) => !item.isFullWidth);
+  const fullWidthItems = detailItems.filter((item) => item.isFullWidth);
+
+  const infoRows = compactItems.reduce<
+    Array<{
+      left: { label: string; value: string };
+      right?: { label: string; value: string };
+    }>
+  >((rows, item, index) => {
+    if (index % 2 === 0) {
+      rows.push({ left: { label: item.label, value: item.value } });
+    } else {
+      rows[rows.length - 1].right = { label: item.label, value: item.value };
+    }
+    return rows;
+  }, []);
 
   return (
     <section className="bg-white py-14 md:py-20">
@@ -242,7 +290,7 @@ export function PropertyExtrasSection({
         {/* Property Information */}
         <div className="mt-16">
           <h2 className="text-[32px] font-bold text-[#0B1C39]">
-            Property <span className="text-[#D3920E]">Information</span>
+            Full Property <span className="text-[#D3920E]">Information</span>
           </h2>
 
           <div className="mt-6 overflow-hidden rounded-xl border border-[#EDEDED] bg-white">
@@ -260,17 +308,42 @@ export function PropertyExtrasSection({
                   className="grid grid-cols-1 gap-3 px-4 py-5 sm:px-6 md:grid-cols-4 md:gap-0"
                 >
                   <div className="text-xs font-semibold text-[#0B1C39]">
-                    {row.leftLabel}
+                    {row.left.label}
                   </div>
 
-                  <div className="text-sm text-[#6F6F6F]">{row.leftValue}</div>
+                  <div className="text-sm text-[#6F6F6F] break-words">
+                    {row.left.value}
+                  </div>
 
+                  {row.right ? (
+                    <>
+                      <div className="text-xs font-semibold text-[#0B1C39]">
+                        {row.right.label}
+                      </div>
+
+                      <div className="text-sm text-[#6F6F6F] break-words md:text-right">
+                        {row.right.value}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="hidden md:block" />
+                      <div className="hidden md:block" />
+                    </>
+                  )}
+                </div>
+              ))}
+
+              {fullWidthItems.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid grid-cols-1 gap-3 px-4 py-5 sm:px-6 md:grid-cols-[220px_1fr]"
+                >
                   <div className="text-xs font-semibold text-[#0B1C39]">
-                    {row.rightLabel}
+                    {row.label}
                   </div>
-
-                  <div className="text-sm text-[#6F6F6F] md:text-right">
-                    {row.rightValue}
+                  <div className="text-sm text-[#6F6F6F] break-words whitespace-pre-wrap">
+                    {row.value}
                   </div>
                 </div>
               ))}

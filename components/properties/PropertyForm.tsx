@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, type Resolver, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Select,
     SelectContent,
@@ -41,20 +42,45 @@ const optionalNumber = z.preprocess((val) => {
     return val;
 }, z.number().optional());
 
+const propertyTypeOptions = [
+    "Apartment",
+    "Studio",
+    "Penthouse",
+    "Duplex",
+    "Condo",
+    "Bungalow",
+    "Land",
+] as const;
+
 const optionalListingType = z.preprocess(
     trimToUndefined,
     z.enum(["For Sale", "For Rent"]).optional()
 );
 
+const optionalPropertyType = z.preprocess(
+    trimToUndefined,
+    z.enum(propertyTypeOptions).optional()
+);
+
+const optionalBoolean = z.preprocess((val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    if (val === "true") return true;
+    if (val === "false") return false;
+    return val;
+}, z.boolean().optional());
+
 const schema = z.object({
     title: optionalString,
     listingType: optionalListingType,
-    propertyType: optionalString,
+    propertyType: optionalPropertyType,
     bedrooms: optionalNumber,
     bathrooms: optionalNumber,
     area: optionalNumber,
+    landArea: optionalNumber,
     description: optionalString,
     location: optionalString,
+    lat: optionalNumber,
+    lng: optionalNumber,
     price: optionalNumber,
     // Optional detailed fields
     builtUp: optionalNumber,
@@ -76,6 +102,9 @@ const schema = z.object({
     addedOn: optionalString,
     originalPrice: optionalNumber,
     handoverDate: optionalString,
+    parking: optionalBoolean,
+    gatedCommunity: optionalBoolean,
+    staffQuarters: optionalBoolean,
 }).partial();
 
 type FormValues = z.infer<typeof schema>;
@@ -102,7 +131,7 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
         },
     });
 
-    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = form;
+    const { register, handleSubmit, reset, setValue, watch, control, formState: { errors } } = form;
 
     useEffect(() => {
         if (initialData) {
@@ -113,8 +142,11 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 bedrooms: initialData.bedrooms,
                 bathrooms: initialData.bathrooms,
                 area: initialData.area,
+                landArea: initialData.landArea,
                 description: initialData.description || "",
                 location: initialData.location,
+                lat: initialData.lat,
+                lng: initialData.lng,
                 price: initialData.price,
                 builtUp: initialData.builtUp,
                 plot: initialData.plot,
@@ -135,6 +167,9 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 addedOn: initialData.addedOn,
                 originalPrice: initialData.originalPrice,
                 handoverDate: initialData.handoverDate,
+                parking: initialData.parking,
+                gatedCommunity: initialData.gatedCommunity,
+                staffQuarters: initialData.staffQuarters,
             });
             setExistingImages(initialData.images || []);
             setSelectedAmenities(initialData.propertyCommunityAmenities || []);
@@ -167,7 +202,8 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
         const sanitizedData = { ...data };
         const numericFields: (keyof FormValues)[] = [
             "bedrooms", "bathrooms", "area", "price",
-            "builtUp", "plot", "acres", "keyBuiltUp", "originalPrice"
+            "builtUp", "plot", "acres", "landArea", "keyBuiltUp", "originalPrice",
+            "lat", "lng"
         ];
 
         numericFields.forEach(field => {
@@ -184,7 +220,13 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
             delete sanitizedData.plot;
         } else {
             delete sanitizedData.acres;
+            delete sanitizedData.landArea;
         }
+
+        // Backend currently rejects these fields via DTO whitelist
+        delete sanitizedData.parking;
+        delete sanitizedData.gatedCommunity;
+        delete sanitizedData.staffQuarters;
 
         const formDataObj: PropertyFormData = {
             ...sanitizedData,
@@ -224,21 +266,18 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                     <div className="space-y-2">
                         <Label>Property Type</Label>
                         <Select
-                            onValueChange={(val) => setValue("propertyType", val)}
+                            onValueChange={(val) => setValue("propertyType", val as FormValues["propertyType"])}
                             value={watch("propertyType")}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select Property Type" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Apartment">Apartment</SelectItem>
-                                <SelectItem value="Studio">Studio</SelectItem>
-                                <SelectItem value="Penthouse">Penthouse</SelectItem>
-                                <SelectItem value="Duplex">Duplex</SelectItem>
-                                <SelectItem value="Condo">Condo</SelectItem>
-                                <SelectItem value="Bungalow">Bungalow</SelectItem>
-                                <SelectItem value="Cottage">Cottage</SelectItem>
-                                <SelectItem value="Land">Land</SelectItem>
+                                {propertyTypeOptions.map((type) => (
+                                    <SelectItem key={type} value={type}>
+                                        {type}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                         {errors.propertyType && <p className="text-xs text-red-500">{errors.propertyType.message}</p>}
@@ -266,10 +305,16 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {isLand ? (
-                        <div className="space-y-2 md:col-span-4">
-                            <Label>Acres/Plot</Label>
-                            <Input type="number" {...register("acres", { valueAsNumber: true })} />
-                        </div>
+                        <>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label>Acres</Label>
+                                <Input type="number" {...register("acres", { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label>Land Area (sq ft)</Label>
+                                <Input type="number" {...register("landArea", { valueAsNumber: true })} />
+                            </div>
+                        </>
                     ) : (
                         <>
                             <div className="space-y-2">
@@ -357,7 +402,73 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 />
             </div>
 
-            {/* Section 5: Property Information */}
+            {/* Section 5: Property Features */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
+                <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Features</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Controller
+                        control={control}
+                        name="parking"
+                        render={({ field }) => (
+                            <div className="space-y-2">
+                                <Label>Parking</Label>
+                                <Select
+                                    value={
+                                        field.value === true
+                                            ? "true"
+                                            : field.value === false
+                                            ? "false"
+                                            : ""
+                                    }
+                                    onValueChange={(val) => field.onChange(val === "true")}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select option" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="true">Yes</SelectItem>
+                                        <SelectItem value="false">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name="gatedCommunity"
+                        render={({ field }) => (
+                            <div className="flex items-center gap-3">
+                                <Checkbox
+                                    id="gatedCommunity"
+                                    checked={field.value ?? false}
+                                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                                />
+                                <Label htmlFor="gatedCommunity" className="cursor-pointer">
+                                    Gated Community
+                                </Label>
+                            </div>
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name="staffQuarters"
+                        render={({ field }) => (
+                            <div className="flex items-center gap-3">
+                                <Checkbox
+                                    id="staffQuarters"
+                                    checked={field.value ?? false}
+                                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                                />
+                                <Label htmlFor="staffQuarters" className="cursor-pointer">
+                                    Staff Quarters
+                                </Label>
+                            </div>
+                        )}
+                    />
+                </div>
+            </div>
+
+            {/* Section 6: Property Information */}
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
                 <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -388,7 +499,7 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 </div>
             </div>
 
-            {/* Section 6: Location & Price */}
+            {/* Section 7: Location & Price */}
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
                 <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Location & Price</h3>
                 <div className="space-y-6">
@@ -396,6 +507,16 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                         <Label>Location</Label>
                         <Input {...register("location")} placeholder="Nairobi, Westlands, Riverside Drive" />
                         {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>Latitude</Label>
+                            <Input type="number" step="any" {...register("lat", { valueAsNumber: true })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Longitude</Label>
+                            <Input type="number" step="any" {...register("lng", { valueAsNumber: true })} />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Price (KSh)</Label>
@@ -411,7 +532,7 @@ export function PropertyForm({ mode, propertyId, initialData, onSuccess }: Prope
                 </div>
             </div>
 
-            {/* Section 7: Property Images */}
+            {/* Section 8: Property Images */}
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm space-y-6">
                 <h3 className="text-base font-semibold leading-[150%] text-gray-900 border-b border-gray-100 pb-4">Property Images</h3>
                 <PropertyImageUpload

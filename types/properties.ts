@@ -1,26 +1,39 @@
 export type ListingType = "For Sale" | "For Rent";
 export type PropertyStatus = "pending" | "approved" | "rejected";
+export type PropertyType =
+    | "Apartment"
+    | "Studio"
+    | "Penthouse"
+    | "Duplex"
+    | "Condo"
+    | "Bungalow"
+    | "Land";
 
 export interface Property {
     _id: string;
     title: string;
     listingType: ListingType;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    area: number;
-    description?: string;
+    propertyType: PropertyType;
     location: string;
-    lat?: number;
-    lng?: number;
     price: number;
-    images: string[];
     status: PropertyStatus;
-    createBy: string;
-    // Optional fields
+    createdAt: string;
+    updatedAt: string;
+    // Optional fields (match backend model)
+    bedrooms?: number;
+    bathrooms?: number;
+    acres?: number;
+    area?: number;
+    landArea?: number;
     builtUp?: number;
     plot?: number;
-    acres?: number;
+    description?: string;
+    lat?: number;
+    lng?: number;
+    images?: string[];
+    createBy?: string;
+    listingUser?: string[];
+    bookmarkUser?: string[];
     keyBedRooms?: string;
     keyBathrooms?: string;
     keyBuiltUp?: number;
@@ -38,24 +51,28 @@ export interface Property {
     furnishing?: string;
     addedOn?: string;
     handoverDate?: string;
-    createdAt: string;
-    updatedAt: string;
+    parking?: boolean;
+    gatedCommunity?: boolean;
+    staffQuarters?: boolean;
 }
 
 export interface PropertyFormData {
     title?: string;
     listingType?: ListingType;
-    propertyType?: string;
+    propertyType?: PropertyType;
     bedrooms?: number;
     bathrooms?: number;
+    acres?: number;
     area?: number;
-    description?: string;
-    location?: string;
-    price?: number;
-    // Optional fields
+    landArea?: number;
     builtUp?: number;
     plot?: number;
-    acres?: number;
+    description?: string;
+    location?: string;
+    lat?: number;
+    lng?: number;
+    price?: number;
+    // Optional fields
     keyBedRooms?: string;
     keyBathrooms?: string;
     keyBuiltUp?: number;
@@ -73,6 +90,9 @@ export interface PropertyFormData {
     furnishing?: string;
     addedOn?: string;
     handoverDate?: string;
+    parking?: boolean;
+    gatedCommunity?: boolean;
+    staffQuarters?: boolean;
     images?: File[];
 }
 
