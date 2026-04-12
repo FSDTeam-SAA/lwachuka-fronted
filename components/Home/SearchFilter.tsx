@@ -300,7 +300,7 @@ export function SearchFilter({
 
   return (
     <section>
-      <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto container py-10 px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-[#E5E5E5] bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)] md:p-8">
           <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
             {/* Search Term */}

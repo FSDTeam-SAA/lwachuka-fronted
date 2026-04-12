@@ -51,7 +51,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static top-0 left-0 z-50",
+          "fixed lg:sticky top-0 left-0 z-50",
           "h-screen flex flex-col bg-white transition-transform duration-300 shadow-[0px_4px_6px_0px_#0000001A]",
           "w-[280px] lg:w-[340px] ",
           isMobileMenuOpen

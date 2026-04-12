@@ -105,6 +105,9 @@ export function Advertisements() {
   const paidAds = ads.filter(isPaid);
   // Prefer paid ads when available, otherwise show any to avoid an empty section.
   const visibleAds = paidAds.length > 0 ? paidAds : ads;
+  const shouldAnimate = visibleAds.length > 1;
+  const loopAds = shouldAnimate ? [...visibleAds, ...visibleAds] : visibleAds;
+  const animationDuration = Math.max(visibleAds.length * 6, 24);
 
   return (
     <section className="py-16 md:py-24 bg-white">
@@ -135,61 +138,98 @@ export function Advertisements() {
             No active advertisements at the moment
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {visibleAds.map((ad) => {
-              const duration = ad.compaingDuration || ad.campaignDuration || "—";
-              const hasMedia = Boolean(ad.uploadMedia);
-              const isVideo = isVideoAd(ad);
+          <div className="ads-marquee">
+            <div
+              className="ads-track"
+              style={
+                shouldAnimate
+                  ? { animationDuration: `${animationDuration}s` }
+                  : { animation: "none" }
+              }
+            >
+              {loopAds.map((ad, index) => {
+                const duration = ad.compaingDuration || ad.campaignDuration || "—";
+                const hasMedia = Boolean(ad.uploadMedia);
+                const isVideo = isVideoAd(ad);
 
-              return (
-              <div key={ad._id} className="group">
-                {/* Blue frame container – you can add border-blue-600 if needed */}
-                <div className="rounded-2xl">
-                  <div className="rounded-xl bg-white p-2 shadow-sm">
-                    <div className="relative h-[430px] w-full overflow-hidden rounded-[4px] bg-[#F4F6F8]">
-                      {!hasMedia ? (
-                        <div className="flex h-full items-center justify-center text-gray-400">
-                          No media
+                return (
+                  <div
+                    key={`${ad._id}-${index}`}
+                    className="group min-w-[260px] sm:min-w-[280px] lg:min-w-[300px]"
+                  >
+                    <div className="rounded-2xl">
+                      <div className="rounded-xl bg-white p-2 shadow-sm">
+                        <div className="relative h-[430px] w-full overflow-hidden rounded-[4px] bg-[#F4F6F8]">
+                          {!hasMedia ? (
+                            <div className="flex h-full items-center justify-center text-gray-400">
+                              No media
+                            </div>
+                          ) : isVideo ? (
+                            <video
+                              src={ad.uploadMedia}
+                              className="h-full w-full object-cover"
+                              controls
+                              playsInline
+                              preload="metadata"
+                            />
+                          ) : (
+                            <Image
+                              src={ad.uploadMedia}
+                              alt={`${ad.companyName} advertisement`}
+                              fill
+                              className="object-contain"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                              unoptimized
+                            />
+                          )}
                         </div>
-                      ) : isVideo ? (
-                        <video
-                          src={ad.uploadMedia}
-                          className="h-full w-full object-cover"
-                          controls
-                          playsInline
-                          preload="metadata"
-                        />
-                      ) : (
-                        <Image
-                          src={ad.uploadMedia}
-                          alt={`${ad.companyName} advertisement`}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                          unoptimized
-                        />
-                      )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-3 px-1">
+                      <p className="text-2xl font-semibold text-[#05203D] line-clamp-2">
+                        {ad.companyName}
+                      </p>
+                      <p className="text-base text-[#ACACAC]">
+                        {ad.advertisementType} • {duration}
+                      </p>
                     </div>
                   </div>
-                </div>
-
-                {/* Footer text – outside the frame */}
-                <div className="mt-4 space-y-3 px-1">
-                  <p className="text-2xl font-semibold text-[#05203D] line-clamp-2">
-                    {ad.companyName}
-                  </p>
-                  <p className="text-base text-[#ACACAC]">
-                    {ad.advertisementType} • {duration}
-                  </p>
-                  {/* Views – you don't have views in API, so either remove or add later */}
-                  {/* <div className="flex items-center gap-2 text-base text-[#68706A]">
-                    <Eye className="h-4 w-4" />
-                    <span>—</span>
-                  </div> */}
-                </div>
-              </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <style jsx>{`
+              .ads-marquee {
+                position: relative;
+                overflow: hidden;
+                padding-bottom: 8px;
+              }
+              .ads-track {
+                display: flex;
+                gap: 1.5rem;
+                width: max-content;
+                animation-name: ads-scroll;
+                animation-timing-function: linear;
+                animation-iteration-count: infinite;
+                will-change: transform;
+              }
+              .ads-marquee:hover .ads-track {
+                animation-play-state: paused;
+              }
+              @keyframes ads-scroll {
+                from {
+                  transform: translateX(0);
+                }
+                to {
+                  transform: translateX(-50%);
+                }
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .ads-track {
+                  animation: none !important;
+                }
+              }
+            `}</style>
           </div>
         )}
       </div>
