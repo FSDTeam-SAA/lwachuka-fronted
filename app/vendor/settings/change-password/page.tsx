@@ -1,12 +1,5 @@
-import React from 'react'
-import ChangePassword from '../_components/ChangePassword'
+import { SettingsTabs } from "@/components/dashboard/settings/SettingsTabs";
 
-function page() {
-  return (
-    <div>
-        <ChangePassword />
-    </div>
-  )
+export default function VendorChangePasswordPage() {
+  return <SettingsTabs defaultTab="password" />;
 }
-
-export default page

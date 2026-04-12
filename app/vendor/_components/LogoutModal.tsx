@@ -21,8 +21,8 @@ export function LogoutModal() {
   const handleLogout = async () => {
     try {
       // NextAuth sign out
-      await signOut({ redirect: false }); // redirect false মানে আমরা নিজে redirect করবো
-      router.push("/login"); // লগআউট হলে login page এ redirect
+      await signOut({ redirect: false }); 
+      router.push("/"); 
     } catch (error) {
       console.error("Logout failed:", error);
     }

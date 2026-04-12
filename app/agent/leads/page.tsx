@@ -9,7 +9,6 @@ import { LeadRow } from '@/components/leads/LeadRow'
 import { LeadContactModal } from '@/components/leads/LeadContactModal'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Building2 } from 'lucide-react'
-
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 
 export default function LeadsPage() {
@@ -42,44 +41,52 @@ export default function LeadsPage() {
         subtitle="Manage and respond to property inquiries"
       />
 
-      <div className="p-8 max-w-full mx-auto">
-
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Stat Cards */}
-        <LeadStatCards />
+        <div className="mb-4 sm:mb-5 lg:mb-6">
+          <LeadStatCards />
+        </div>
 
         {/* Leads List Section */}
-        <div className="mb-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_2px_8px_-3px_rgba(6,81,237,0.02)]">
-          <h2 className="text-sm font-semibold text-gray-900 mb-5">
+        <div className="mb-4 rounded-xl border border-gray-100 bg-white p-4 shadow-[0_2px_8px_-3px_rgba(6,81,237,0.02)] sm:rounded-2xl sm:p-5 lg:p-6">
+          <h2 className="mb-4 text-sm font-semibold text-gray-900 sm:mb-5">
             All Leads ({meta?.total || leads.length})
           </h2>
 
           {isLoading ? (
-            <div className="space-y-4 shadow-sm border border-gray-100 p-2 rounded-xl">
+            <div className="space-y-3 rounded-xl border border-gray-100 p-2 shadow-sm sm:space-y-4 sm:p-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex p-5 gap-4 items-center">
-                  <Skeleton className="h-12 w-12 rounded-full shrink-0" />
-                  <div className="w-full">
-                    <Skeleton className="h-4 w-40 mb-2" />
-                    <Skeleton className="h-3 w-64" />
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-lg p-3 sm:gap-4 sm:p-5"
+                >
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-full sm:h-12 sm:w-12" />
+
+                  <div className="min-w-0 flex-1">
+                    <Skeleton className="mb-2 h-4 w-28 sm:w-40" />
+                    <Skeleton className="h-3 w-32 sm:w-64" />
                   </div>
-                  <Skeleton className="h-8 w-24 shrink-0" />
+
+                  <Skeleton className="h-8 w-20 shrink-0 sm:w-24" />
                 </div>
               ))}
             </div>
           ) : leads.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(6,81,237,0.06)] border border-gray-100 flex flex-col items-center">
-              <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                <Building2 className="h-8 w-8 text-gray-400" />
+            <div className="flex flex-col items-center rounded-xl border border-gray-100 bg-white px-4 py-14 text-center shadow-[0_2px_8px_-3px_rgba(6,81,237,0.06)] sm:px-6 sm:py-16 lg:py-20">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-50 sm:h-16 sm:w-16">
+                <Building2 className="h-7 w-7 text-gray-400 sm:h-8 sm:w-8" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+
+              <h3 className="mb-1 text-base font-semibold text-gray-900 sm:text-lg">
                 No Leads Yet
               </h3>
-              <p className="text-sm text-gray-500">
+
+              <p className="max-w-md text-sm leading-6 text-gray-500">
                 You don&apos;t have any property inquiries at the moment.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {leads.map((lead) => (
                 <LeadRow
                   key={lead._id}
@@ -93,7 +100,10 @@ export default function LeadsPage() {
 
         {/* Modal Profile Contact */}
         {selectedLeadId && (
-          <LeadContactModal leadId={selectedLeadId} onClose={handleCloseModal} />
+          <LeadContactModal
+            leadId={selectedLeadId}
+            onClose={handleCloseModal}
+          />
         )}
       </div>
     </div>

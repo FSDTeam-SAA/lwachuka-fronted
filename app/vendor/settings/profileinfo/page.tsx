@@ -1,12 +1,5 @@
-import React from 'react'
-import ProfileInfoUpdate from '../_components/ProfileInfoUpdate'
+import { SettingsTabs } from "@/components/dashboard/settings/SettingsTabs";
 
-function page() {
-  return (
-    <div>
-        <ProfileInfoUpdate />
-    </div>
-  )
+export default function VendorProfileInfoPage() {
+  return <SettingsTabs defaultTab="profile" />;
 }
-
-export default page
