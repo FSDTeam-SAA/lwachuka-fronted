@@ -21,7 +21,7 @@ async function fetchPropertyTypes(): Promise<string[]> {
     throw new Error('Missing NEXT_PUBLIC_BACKEND_API_URL');
   }
 
-  const res = await fetch(`${baseUrl}/property/?status=approved`, {
+  const res = await fetch(`${baseUrl}/property?status=approved`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +52,11 @@ type SearchFilterValues = {
   transaction?: 'buy' | 'sell' | 'rent' | 'Buy' | 'Sell' | 'Rent' | string;
   listingType?: string;
   propertyType?: string;
+  searchTerm?: string;
   type?: string;
+  title?: string;
+  purpose?: string;
+  referenceNumber?: string;
   location?: string;
   price?: string;
   bedrooms?: string | number;
@@ -78,7 +82,10 @@ export function SearchFilter({
   const router = useRouter();
   const [listingType, setListingType] = useState<'Sell' | 'Rent'>('Sell');
   const [propertyType, setPropertyType] = useState('All');
-  const [lookingFor, setLookingFor] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [title, setTitle] = useState('');
+  const [purpose, setPurpose] = useState('');
+  const [referenceNumber, setReferenceNumber] = useState('');
   const [location, setLocation] = useState('');
   const [price, setPrice] = useState('');
   const [bedrooms, setBedrooms] = useState('');
@@ -92,7 +99,14 @@ export function SearchFilter({
 
   const initialListingType = (initialValues?.listingType ?? '').toString();
   const initialTransaction = (initialValues?.transaction ?? '').toString();
-  const initialType = (initialValues?.type ?? '').toString();
+  const initialSearchTerm = (
+    initialValues?.searchTerm ??
+    initialValues?.type ??
+    ''
+  ).toString();
+  const initialTitle = (initialValues?.title ?? '').toString();
+  const initialPurpose = (initialValues?.purpose ?? '').toString();
+  const initialReferenceNumber = (initialValues?.referenceNumber ?? '').toString();
   const initialLocation = (initialValues?.location ?? '').toString();
   const initialPrice = (initialValues?.price ?? '').toString();
   const initialPropertyType = (initialValues?.propertyType ?? '').toString();
@@ -124,7 +138,10 @@ export function SearchFilter({
     const hasInitialValues = [
       initialListingType,
       initialTransaction,
-      initialType,
+      initialSearchTerm,
+      initialTitle,
+      initialPurpose,
+      initialReferenceNumber,
       initialLocation,
       initialPrice,
       initialBedrooms,
@@ -147,7 +164,10 @@ export function SearchFilter({
         : 'Sell';
 
     setListingType(normalizedListing);
-    setLookingFor(initialType);
+    setSearchTerm(initialSearchTerm);
+    setTitle(initialTitle);
+    setPurpose(initialPurpose);
+    setReferenceNumber(initialReferenceNumber);
     setLocation(initialLocation);
     setPrice(initialPrice);
     setBedrooms(initialBedrooms);
@@ -172,7 +192,10 @@ export function SearchFilter({
   }, [
     initialListingType,
     initialTransaction,
-    initialType,
+    initialSearchTerm,
+    initialTitle,
+    initialPurpose,
+    initialReferenceNumber,
     initialLocation,
     initialPrice,
     initialBedrooms,
@@ -198,7 +221,10 @@ export function SearchFilter({
   const handleFindProperties = (overrides?: {
     listingType?: 'Sell' | 'Rent';
     propertyType?: string;
-    lookingFor?: string;
+    searchTerm?: string;
+    title?: string;
+    purpose?: string;
+    referenceNumber?: string;
     location?: string;
     price?: string;
     bedrooms?: string;
@@ -211,7 +237,10 @@ export function SearchFilter({
   }) => {
     const selectedListingType = overrides?.listingType ?? listingType;
     const selectedPropertyType = overrides?.propertyType ?? propertyType;
-    const selectedLookingFor = overrides?.lookingFor ?? lookingFor;
+    const selectedSearchTerm = overrides?.searchTerm ?? searchTerm;
+    const selectedTitle = overrides?.title ?? title;
+    const selectedPurpose = overrides?.purpose ?? purpose;
+    const selectedReferenceNumber = overrides?.referenceNumber ?? referenceNumber;
     const selectedLocation = overrides?.location ?? location;
     const selectedPrice = overrides?.price ?? price;
     const selectedBedrooms = overrides?.bedrooms ?? bedrooms;
@@ -224,7 +253,10 @@ export function SearchFilter({
 
     const params = new URLSearchParams();
 
-    const looking = selectedLookingFor.trim();
+    const searchTermValue = selectedSearchTerm.trim();
+    const titleValue = selectedTitle.trim();
+    const purposeValue = selectedPurpose.trim();
+    const referenceValue = selectedReferenceNumber.trim();
     const place = selectedLocation.trim();
     const priceValue = selectedPrice.trim();
     const bedroomsValue = selectedBedrooms.trim();
@@ -232,7 +264,11 @@ export function SearchFilter({
     const minLandValue = selectedMinLand.trim();
     const maxLandValue = selectedMaxLand.trim();
 
-    if (looking) params.set('type', looking);
+    if (searchTermValue) params.set('searchTerm', searchTermValue);
+    if (titleValue) params.set('title', titleValue);
+    if (purposeValue) params.set('purpose', purposeValue);
+    if (referenceValue) params.set('referenceNumber', referenceValue);
+    params.set('status', 'approved');
     if (place) params.set('location', place);
     if (priceValue) params.set('price', priceValue);
     if (bedroomsValue) params.set('bedrooms', bedroomsValue);
@@ -264,22 +300,67 @@ export function SearchFilter({
 
   return (
     <section>
-      <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto container py-10 px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-[#E5E5E5] bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)] md:p-8">
           <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {/* Looking For */}
+            {/* Search Term */}
             <div>
               <label className="block text-sm font-semibold text-[#1E1E1E]">
-                Looking For
+                Search Term
               </label>
               <div className="relative mt-2">
                 <Input
-                  placeholder="Enter Type"
+                  placeholder="Keyword or phrase"
                   className="h-11 rounded-xl border-[#D6D6D6] bg-white pl-10 placeholder:text-[#7D7D7D]"
-                  value={lookingFor}
-                  onChange={(event) => setLookingFor(event.target.value)}
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
                 />
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Title
+              </label>
+              <div className="relative mt-2">
+                <Input
+                  placeholder="Exact title"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Purpose */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Purpose
+              </label>
+              <div className="relative mt-2">
+                <Input
+                  placeholder="Purpose"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={purpose}
+                  onChange={(event) => setPurpose(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Reference No. */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1E1E1E]">
+                Reference No.
+              </label>
+              <div className="relative mt-2">
+                <Input
+                  placeholder="Reference number"
+                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
+                  value={referenceNumber}
+                  onChange={(event) => setReferenceNumber(event.target.value)}
+                />
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "@studio-freight/lenis";
 
 interface Props {
@@ -8,7 +9,12 @@ interface Props {
 }
 
 export default function SmoothScrollProvider({ children }: Props) {
+  const pathname = usePathname();
+  const isDashboardRoute = pathname?.startsWith("/user/dashboard");
+
   useEffect(() => {
+    if (isDashboardRoute) return;
+
     const lenis = new Lenis({
       lerp: 0.1,
       smoothWheel: true,
@@ -24,7 +30,7 @@ export default function SmoothScrollProvider({ children }: Props) {
     return () => {
       lenis.destroy();
     };
-  }, []);
+  }, [isDashboardRoute]);
 
   return <>{children}</>;
 }

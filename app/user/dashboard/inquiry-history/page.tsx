@@ -177,10 +177,10 @@ function InquiryCard({ item, onClick }: InquiryCardProps) {
             </span>
             <div className="min-w-0">
               <h3 className="truncate text-[18px] sm:text-[20px] font-medium text-[#3E4650]">
-                {item.propertyId.title}
+                {item?.propertyId?.title}
               </h3>
               <p className="mt-1 text-[13px] sm:text-[14px] text-[#9A9FA8]">
-                {item.propertyId.location}
+                {item?.propertyId?.location}
               </p>
             </div>
           </div>
@@ -304,9 +304,9 @@ export default function MyLeadsDashboard() {
             <div className="flex items-start justify-between gap-4 px-5 py-4 sm:px-6">
               <div>
                 <h2 className="text-[20px] sm:text-[24px] font-semibold text-[#061F3D]">
-                  {selectedLead.propertyId.title}
+                  {selectedLead?.propertyId?.title}
                 </h2>
-                <p className="mt-1 text-[#4A5565]">{selectedLead.propertyId.location}</p>
+                <p className="mt-1 text-[#4A5565]">{selectedLead?.propertyId?.location}</p>
               </div>
               <button
                 onClick={() => setSelectedLead(null)}
@@ -357,7 +357,7 @@ export default function MyLeadsDashboard() {
                 <button
                   type="button"
                   onClick={() => {
-                    const slugOrId = selectedLead.propertyId.slug ?? selectedLead.propertyId._id;
+                    const slugOrId = selectedLead?.propertyId?.slug ?? selectedLead?.propertyId?._id;
                     router.push(`/property-buy/${slugOrId}`);
                   }}
                   className="flex-1 flex items-center justify-center gap-2 rounded-lg border-2 border-[#061F3D] bg-white px-5 py-3 text-[15px] font-medium text-[#061F3D] hover:bg-[#F8FAFC]"

@@ -90,7 +90,7 @@ export default function AgentDashboard() {
         subtitle="Welcome back! Here's your property portfolio summary."
       />
 
-      <div className="p-8 space-y-8">
+      <div className="p-3 md:p-8 space-y-8">
         {/* Row 1 — Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {stats.map(card => (
