@@ -1,12 +1,5 @@
-import React from 'react'
-import SettingsPage from './_components/SettingsPage'
+import { SettingsTabs } from "@/components/dashboard/settings/SettingsTabs";
 
-function page() {
-  return (
-    <div>
-        <SettingsPage />
-    </div>
-  )
+export default function SettingsPage() {
+    return <SettingsTabs />;
 }
-
-export default page
