@@ -54,7 +54,7 @@ export function BrowsePurpose() {
               <div>
                 <Button
                   asChild
-                  className="w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6"
+                  className=" w-full lg:w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6"
                 >
                   <Link href="/properties?tab=rent">
                     Browse Rent Listings
@@ -95,7 +95,7 @@ export function BrowsePurpose() {
               <div>
                 <Button
                   asChild
-                  className="w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6"
+                  className=" w-full lg:w-[500px] bg-white text-[#D3920E] hover:bg-white/90 rounded-full h-14 text-base font-medium flex items-center justify-between px-6"
                 >
                   <Link href="/properties?tab=sale">
                     Browse Sale Listings
