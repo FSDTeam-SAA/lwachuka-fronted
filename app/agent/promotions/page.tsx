@@ -48,7 +48,7 @@ export default function PromotionsPage() {
         subtitle="Boost your property visibility with premium advertising"
       />
 
-      <div className="p-8 max-w-full mx-auto">
+      <div className=" p-3 lg:p-8 max-w-full mx-auto">
         <PromotionStats />
 
         <div className="space-y-12">
