@@ -40,7 +40,7 @@ export default function MyPropertiesPage() {
         </Button>
       </DashboardHeader>
 
-      <div className="p-8 max-w-full mx-auto space-y-8">
+      <div className="p-3 lg:p-8 max-w-full mx-auto space-y-8">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map(i => (

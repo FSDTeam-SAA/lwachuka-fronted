@@ -18,7 +18,7 @@ export default function CreatePropertyPage() {
         backHref="/agent/my-properties"
       />
 
-      <div className="p-8 max-w-full mx-auto space-y-8">
+      <div className="p-3 lg:p-8 max-w-full mx-auto space-y-8">
         <PropertyForm
           mode="create"
           onSuccess={() => router.push('/agent/my-properties')}
