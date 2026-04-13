@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export function HeroSection() {
-  const thumbs = ['/house.png', '/galary.png', '/galary2.png', '/galary3.png']
+  const thumbs = ['/c11.png', '/c22.jpg', '/c33.jpg', '/c44.jpg']
   const pages = thumbs.map((_, idx) => idx + 1)
   const [activeIndex, setActiveIndex] = useState(0)
 

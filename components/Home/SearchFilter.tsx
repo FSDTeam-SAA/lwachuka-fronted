@@ -54,9 +54,6 @@ type SearchFilterValues = {
   propertyType?: string;
   searchTerm?: string;
   type?: string;
-  title?: string;
-  purpose?: string;
-  referenceNumber?: string;
   location?: string;
   price?: string;
   bedrooms?: string | number;
@@ -83,9 +80,6 @@ export function SearchFilter({
   const [listingType, setListingType] = useState<'Sell' | 'Rent'>('Sell');
   const [propertyType, setPropertyType] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [title, setTitle] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [referenceNumber, setReferenceNumber] = useState('');
   const [location, setLocation] = useState('');
   const [price, setPrice] = useState('');
   const [bedrooms, setBedrooms] = useState('');
@@ -104,9 +98,6 @@ export function SearchFilter({
     initialValues?.type ??
     ''
   ).toString();
-  const initialTitle = (initialValues?.title ?? '').toString();
-  const initialPurpose = (initialValues?.purpose ?? '').toString();
-  const initialReferenceNumber = (initialValues?.referenceNumber ?? '').toString();
   const initialLocation = (initialValues?.location ?? '').toString();
   const initialPrice = (initialValues?.price ?? '').toString();
   const initialPropertyType = (initialValues?.propertyType ?? '').toString();
@@ -139,9 +130,6 @@ export function SearchFilter({
       initialListingType,
       initialTransaction,
       initialSearchTerm,
-      initialTitle,
-      initialPurpose,
-      initialReferenceNumber,
       initialLocation,
       initialPrice,
       initialBedrooms,
@@ -165,9 +153,6 @@ export function SearchFilter({
 
     setListingType(normalizedListing);
     setSearchTerm(initialSearchTerm);
-    setTitle(initialTitle);
-    setPurpose(initialPurpose);
-    setReferenceNumber(initialReferenceNumber);
     setLocation(initialLocation);
     setPrice(initialPrice);
     setBedrooms(initialBedrooms);
@@ -193,9 +178,6 @@ export function SearchFilter({
     initialListingType,
     initialTransaction,
     initialSearchTerm,
-    initialTitle,
-    initialPurpose,
-    initialReferenceNumber,
     initialLocation,
     initialPrice,
     initialBedrooms,
@@ -222,9 +204,6 @@ export function SearchFilter({
     listingType?: 'Sell' | 'Rent';
     propertyType?: string;
     searchTerm?: string;
-    title?: string;
-    purpose?: string;
-    referenceNumber?: string;
     location?: string;
     price?: string;
     bedrooms?: string;
@@ -238,9 +217,6 @@ export function SearchFilter({
     const selectedListingType = overrides?.listingType ?? listingType;
     const selectedPropertyType = overrides?.propertyType ?? propertyType;
     const selectedSearchTerm = overrides?.searchTerm ?? searchTerm;
-    const selectedTitle = overrides?.title ?? title;
-    const selectedPurpose = overrides?.purpose ?? purpose;
-    const selectedReferenceNumber = overrides?.referenceNumber ?? referenceNumber;
     const selectedLocation = overrides?.location ?? location;
     const selectedPrice = overrides?.price ?? price;
     const selectedBedrooms = overrides?.bedrooms ?? bedrooms;
@@ -254,9 +230,6 @@ export function SearchFilter({
     const params = new URLSearchParams();
 
     const searchTermValue = selectedSearchTerm.trim();
-    const titleValue = selectedTitle.trim();
-    const purposeValue = selectedPurpose.trim();
-    const referenceValue = selectedReferenceNumber.trim();
     const place = selectedLocation.trim();
     const priceValue = selectedPrice.trim();
     const bedroomsValue = selectedBedrooms.trim();
@@ -265,9 +238,6 @@ export function SearchFilter({
     const maxLandValue = selectedMaxLand.trim();
 
     if (searchTermValue) params.set('searchTerm', searchTermValue);
-    if (titleValue) params.set('title', titleValue);
-    if (purposeValue) params.set('purpose', purposeValue);
-    if (referenceValue) params.set('referenceNumber', referenceValue);
     params.set('status', 'approved');
     if (place) params.set('location', place);
     if (priceValue) params.set('price', priceValue);
@@ -306,7 +276,7 @@ export function SearchFilter({
             {/* Search Term */}
             <div>
               <label className="block text-sm font-semibold text-[#1E1E1E]">
-                Search Term
+                Looking For
               </label>
               <div className="relative mt-2">
                 <Input
@@ -316,51 +286,6 @@ export function SearchFilter({
                   onChange={(event) => setSearchTerm(event.target.value)}
                 />
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              </div>
-            </div>
-
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-semibold text-[#1E1E1E]">
-                Title
-              </label>
-              <div className="relative mt-2">
-                <Input
-                  placeholder="Exact title"
-                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Purpose */}
-            <div>
-              <label className="block text-sm font-semibold text-[#1E1E1E]">
-                Purpose
-              </label>
-              <div className="relative mt-2">
-                <Input
-                  placeholder="Purpose"
-                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
-                  value={purpose}
-                  onChange={(event) => setPurpose(event.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Reference No. */}
-            <div>
-              <label className="block text-sm font-semibold text-[#1E1E1E]">
-                Reference No.
-              </label>
-              <div className="relative mt-2">
-                <Input
-                  placeholder="Reference number"
-                  className="h-11 rounded-xl border-[#D6D6D6] bg-white placeholder:text-[#7D7D7D]"
-                  value={referenceNumber}
-                  onChange={(event) => setReferenceNumber(event.target.value)}
-                />
               </div>
             </div>
 
