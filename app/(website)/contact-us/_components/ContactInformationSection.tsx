@@ -27,7 +27,7 @@ export function ContactInformationSection() {
                   <Mail className="h-4 w-4 text-[#0B1C39]" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#0B1C39]">support@homefinder.com</p>
+                  <p className="text-sm font-medium text-[#0B1C39]">support@homefinderke.com</p>
                 </div>
               </div>
 
