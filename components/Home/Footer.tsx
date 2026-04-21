@@ -113,7 +113,33 @@ export function Footer() {
             <ul className="mt-4 space-y-3 text-sm text-white/70">
               <li>Westlands, Nairobi</li>
               <li>+254 700 000 000</li>
-              <li>info@propertyhub.co.ke</li>
+              <li>
+                <span className="text-white">Contact: </span>
+                <a
+                  href="mailto:contact@homefinderke.com"
+                  className="hover:text-white transition"
+                >
+                  contact@homefinderke.com
+                </a>
+              </li>
+              <li>
+                <span className="text-white">Marketing: </span>
+                <a
+                  href="mailto:marketing@homefinderke.com"
+                  className="hover:text-white transition"
+                >
+                  marketing@homefinderke.com
+                </a>
+              </li>
+              <li>
+                <span className="text-white">Support: </span>
+                <a
+                  href="mailto:support@homefinderke.com"
+                  className="hover:text-white transition"
+                >
+                  support@homefinderke.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>
